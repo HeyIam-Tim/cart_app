@@ -1,0 +1,117 @@
+{% load static %}
+
+<!-- форма для заявки в телерам -->
+<div id="delivery_form" style="display: none; height: 900px;" class="telegram_popup_info absolute top-32 md:left-1/4 z-10 max-w-md bg-white border rounded border-white p-6 pt-10">
+    <!-- крестик для закрытия формы -->
+    <img id="close_icon_email" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closeDeliveryForm()">
+    <!--  -->
+    
+    <!-- заголовок формы -->
+    <span class="">Доставка для детали {{brand}} {{article}} - {{name}}.</span>
+    <!--  -->
+
+    {% csrf_token %}
+
+    <!-- ФИО -->
+    <p class="mt-5 mb-0 text-xs">ФИО<span class="text-red-600">*</span></p>
+    <input type="text" name="credentials" id="credentials" class="border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="ФИО">
+    <!--  -->
+
+    <!-- телефон -->
+    <p class="mt-5 mb-0 text-xs">Телефон<span class="text-red-600">*</span></p>
+    <input type="text" name="delivery_recipient_phone" id="delivery_recipient_phone" class="border rounded border-gray-400 focus:outline-none w-full p-2" required placeholder="Телефон">
+    <!--  -->
+
+    <!-- адрес доставки -->
+    <p class="mt-5 mb-0 text-xs">Адрес доставки <span class="text-red-600">*</span></p>
+    <input type="text" id="address" name="address"  placeholder="Адрес доставки" class="border rounded border-gray-400 focus:outline-none w-full p-2" onkeyup="suggestAddress(this)">
+
+    <ul id="address_box" style="display: none;" class="border rounded border-gray-300 mt-1"></ul>
+    <!--  -->
+
+    <div class="flex h-22" style="height: 70px; justify-content: space-between;">
+        <!-- подъезд -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Подъезд</p>
+            <input type="number" min="1" name="porch" id="porch" class="delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Подъезд">
+        </div>
+        <!--  -->
+    
+        <!-- этаж -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Этаж</p>
+            <input type="number" name="floor" id="floor" class="delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Этаж">
+        </div>
+        <!--  -->
+    
+        <!-- квартира -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Квартира</p>
+            <input type="number" min="1" name="appartment" id="appartment" class="delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Квартира">
+        </div>
+        <!--  -->
+
+        <!-- домофон -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Домофон</p>
+            <input type="number" name="door_code" id="door_code" class="delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Домофон">
+        </div>
+        <!--  -->
+    </div>
+
+    <!-- комментарий курьеру-->
+    <p class="mt-5 mb-0 text-xs">Комментарий курьеру</p>
+    <textarea name="courier_comment" id="courier_comment" cols="20" rows="2" class="delivery border rounded border-gray-400 focus:outline-none w-full p-2"></textarea>
+    <!--  -->
+
+    <!-- количество -->
+    <p class="mt-5 mb-0 text-xs">Количество <span class="text-red-600">*</span></p>
+    <input type="number" min="1" name="delivery_quantity" id="delivery_quantity" class="border rounded border-gray-400 focus:outline-none w-full p-2" required placeholder="Количество">
+    <!--  -->
+
+    <div class="flex h-22" style="height: 70px; justify-content: space-between;">
+        <!-- длина -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Д (макс 1м)<span class="text-red-600">*</span></p>
+            <input type="number" min="0.0" max="1" name="length" id="length" class="border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Длина">
+        </div>
+    
+        <!--  -->
+    
+        <!-- ширина -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Ш (макс 0,6м) <span class="text-red-600">*</span></p>
+            <input type="number" min="0.0" max="0,6" name="width" id="width" class="border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Ширина">
+        </div>
+        <!--  -->
+    
+        <!-- высота -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">В (макс 0,5м)<span class="text-red-600">*</span></p>
+            <input type="number" min="0.0" max="0,5" name="height" id="height" class="border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Высота">
+        </div>
+        <!--  -->
+
+        <!-- вес -->
+        <div class="w-3/12">
+            <p class="mt-5 mb-0 text-xs">Вес</p>
+            <input type="number" min="0" name="weight" id="weight" class="border rounded border-gray-400 focus:outline-none w-11/12 p-2" required placeholder="Вес">
+        </div>
+        <!--  -->
+    </div>
+
+    <!-- комментарий к заказу-->
+    <p class="mt-5 mb-0 text-xs">Комментарий к заказу</p>
+    <textarea name="delivery_comment" id="delivery_comment" cols="20" rows="3" class="border rounded border-gray-400 focus:outline-none w-full p-2"></textarea>
+    <!--  -->
+
+    <!-- кнопка отправить -->
+    <button class="block telegram_popup_info__button mx-auto my-5 text-center py-2 px-5 border rounded-md border-white bg-blue-600 hover:bg-blue-400 text-white" style="margin-bottom: 1.5rem;" onclick="sendDeliveryData()">Расчитать доставку</button>
+    <p id="order_price_info" class=""></p>
+    <p id="delivery_price_info" class=""></p>
+    <p id="quantity_info" class="text-red-600 my-0 text-xs">*обязательное поле</p>
+    <!--  -->
+</div>
+<!--  -->
+    
+    

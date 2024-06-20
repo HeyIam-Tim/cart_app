@@ -1,0 +1,82 @@
+{% load static %}
+<!-- форма для адреса -->
+    <div id="cart_address_delivery_form" class="close_popup center_popup z-10 w-11/12 md:max-w-md bg-white border rounded border-white p-6 pt-10
+       {% if delivery_address %}block{% else %}hidden{% endif %}">
+        <!-- крестик для закрытия формы -->
+        <img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closeCartRecipientDataForm()">
+        <!--  -->
+        
+        <!-- заголовок формы -->
+        <span class="block text-base text-center stem-medium">Адрес доставки</span>
+        <!--  -->
+        
+        <!-- адрес доставки -->
+        <p class="mt-5 mb-0 text-xs text-align-left">Адрес доставки (<span>формат: г Оренбург, ул Ульянова, д 1)</span><span class="text-red-600">*</span></p>
+        <input type="text" id="address" name="address"  placeholder="Адрес доставки" class="cart_recipient_required cart_recipient_input border rounded border-gray-400 focus:outline-none w-full p-2" onkeyup="suggestAddress(this)">
+    
+        <ul id="address_box" style="display: none;" class="border rounded border-gray-300 mt-1"></ul>
+        <!--  -->
+    
+        <div class="flex h-22" style="height: 70px; justify-content: space-between;">
+            <!-- подъезд -->
+            <div class="w-3/12 text-align-left">
+                <p class="mt-5 mb-0 text-xs">Подъезд</p>
+                <input type="number" min="1" name="porch" id="cart_recipient_data_porch" class="cart_recipient_input delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Подъезд">
+            </div>
+            <!--  -->
+
+            <!-- этаж -->
+            <div class="w-3/12 text-align-left">
+                <p class="mt-5 mb-0 text-xs">Этаж</p>
+                <input type="number" name="floor" id="cart_recipient_data_floor" class="cart_recipient_input delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Этаж">
+            </div>
+            <!--  -->
+        
+            <!-- квартира -->
+            <div class="w-3/12 text-align-left">
+                <p class="mt-5 mb-0 text-xs">Квартира</p>
+                <input type="number" min="1" name="appartment" id="cart_recipient_data_appartment" class="cart_recipient_input delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Квартира">
+            </div>
+            <!--  -->
+    
+            <!-- домофон -->
+            <div class="w-3/12 text-align-left">
+                <p class="mt-5 mb-0 text-xs">Домофон</p>
+                <input type="number" name="door_code" id="cart_recipient_data_door_code" class="cart_recipient_input delivery border rounded border-gray-400 w-11/12 focus:outline-none p-2" required placeholder="Домофон">
+            </div>
+            <!--  -->
+        </div>
+
+        <!-- Получатель -->
+        <span class="block mt-3 text-base text-center stem-medium">Получатель</span>
+        <!--  -->
+
+        <!-- ФИО -->
+        <p class="mt-3 mb-0 text-xs text-align-left">Фамилия Имя Отчество (<span>формат: Иванов Иван Иванович</span>)<span class="text-red-600">*</span></p>
+        <input type="text" name="credentials" id="cart_recipient_data_credentials" class="cart_recipient_required cart_recipient_input border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="ФИО">
+        <!--  -->
+
+        <!-- Email -->
+        <p class="mt-3 mb-0 text-xs text-align-left">Email (<span>формат: geoziper@mail.ru</span>)<br>(На него будет приходить чек)<span class="text-red-600">*</span></p>
+        <input type="text" name="email" id="cart_recipient_data_email" class="cart_recipient_required cart_recipient_input border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="Email">
+        <!--  -->
+
+        <!-- телефон -->
+        <div class="{% if delivery_address %}hidden{% else %}block{% endif %}">
+            <p class="mt-5 mb-0 text-xs text-align-left">Телефон (<span>формат: +7(999)999-99-99</span>)<span class="text-red-600">*</span></p>
+            <input  type="text" name="delivery_recipient_phone" id="id_phone_number"
+            class="cart_recipient_input border rounded border-gray-400 focus:outline-none w-full p-2 {% if not delivery_address %}cart_recipient_required{% endif %}"
+            placeholder="Телефон"
+            value="{% if delivery_address %}telegramtelegram{% endif %}">
+        </div>
+        <!--  -->
+
+
+        <!-- кнопка отправить -->
+        <button id="" class="block my-5 mx-auto border py-2 px-5 text-sm rounded-md border-gray-300 bg-gray-300 hover:bg-gray-400 text-black" onclick="addCartRecipientData()">Сохранить адрес</button>
+        <p id="quantity_info" class="text-red-600 my-0 text-xs text-align-left">*обязательное поле</p>
+        <p id="cart_form_info" class="text-red-600 mt-2 text-xs text-align-left"></p>
+        <!--  -->
+        
+    </div>
+<!--  -->

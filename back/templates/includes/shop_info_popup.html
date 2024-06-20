@@ -1,0 +1,47 @@
+{% load static %}
+
+<!-- попап для информации магазина -->
+<div id="shop_info_popup" style="display: none; top: 500px" class="close_popup center_popup w-11/12 lg:w-5/12 p-4 md:p-8 py-10 z-10 bg-white border rounded border-white">
+
+<!-- крестик для закрытия попапа -->
+<img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon"
+  class="cursor-pointer" onclick="closePopup(this)">
+<!--  -->
+
+<p class="m-auto mb-10 md:ml-0 text-xl text-center">Информация о магазине</p>
+
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Наименование </span>
+  <span class="block w-8/12 text-align-left" id="shop_name"></span>
+</div>
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Адрес</span>
+  <span class="block w-8/12 text-align-left" id="shop_address"></span>
+</div>
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Номер телефона</span>
+  <span class="block w-8/12 text-align-left"><a id="shop_phone" href=""></a></span>
+</div>
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Сайт</span>
+  <span class="block w-8/12 text-align-left" id="shop_site"></span>
+</div>
+
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Email</span>
+  <span class="block w-8/12 text-align-left" id="shop_email"></span>
+</div>
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Описание</span>
+  <span class="block w-8/12 text-align-left" id="shop_description"></span>
+</div>
+<div class="flex w-full mt-5 border-b pb-2">
+  <span class="block w-4/12 text-align-left">Часы работы</span>
+  <span class="block w-8/12 text-align-left" id="shop_opening_hours"></span>
+</div>
+
+<!-- яндекс карта -->
+<div id="map" class="w-full h-96 mx-auto mt-5 border rounded"></div>
+
+</div>
+<!--  -->

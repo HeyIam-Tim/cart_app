@@ -1,0 +1,123 @@
+{% load static %}
+
+<!-- форма для заявки в телерам -->
+<div id="telegram_popup" style="display: none; height: 770px;" class="telegram_popup_info absolute top-32 md:left-1/4 z-10 max-w-md bg-white border rounded border-white p-6 pt-10">
+    <!-- крестик для закрытия формы -->
+    <img id="close_icon_email" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closeTelegramPopup()">
+    <!--  -->
+    
+    <!-- заголовок формы -->
+    <span class="">Заявка на деталь {{brand}} {{article}} - {{name}}.</span>
+    <!--  -->
+
+    <!-- заголовок для VIN-номера -->
+    <p class="mt-5 mb-0 text-xs">Укажите VIN-номер</p>
+    <span id="text_info" style="font-size: 9px; line-height: 10px;">Мы запомним его и в следующий раз вам не придётся вводить его снова</span>
+    <!--  -->
+
+    <!-- инпут с VIN-номер -->
+    <input type="text" name="vin" id="vin_number" class="border rounded border-gray-400 focus:outline-none w-full p-2" data-user_id="{{request.user.id}}" placeholder="VIN-номер" onkeyup="searchVinNumber(this)">
+    <div id="vin_numbers_box" class="w-full border rounded border-gray-400 mt-1 max-h-40 overflow-y-scroll" style="display: none;"></div>
+    <!--  -->
+
+    <!-- запомним VIN-номер -->
+    <p id="quantity_info" class="text-red-600 my-0 mt-1" style="font-size: 9px; line-height: 10px;">*обязательно, если установлено "проверка совместимости"</p>
+    <!--  -->
+
+    <!-- Поиск моделей и марок автомобилей -->
+    <div>
+        <p class="mt-5 mb-0 text-xs">Введите модель автомобиля</p>
+        <input type="text" name="car_model_input" id="car_model_input" class="border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="Rapid" onkeyup="searchCarBrandCarModel(this)">
+        <div id="car_model_suggest_box" class="w-full border rounded border-gray-400 mt-1 max-h-40 overflow-y-scroll" style="display: none;"></div>
+    </div>
+    <!--  -->
+
+    {% csrf_token %}
+
+    <!-- поле с количеством -->
+    <p class="mt-5 mb-0 text-xs">Укажите количество <span class="text-red-600">*</span></p>
+    <input type="number" min="1" name="quantity" id="quantity" class="border rounded border-gray-400 focus:outline-none w-full p-2" required placeholder="Количество">
+    <p id="quantity_info" class="text-red-600 my-0 mt-1" style="font-size: 9px; line-height: 10px;">*обязательное поле</p>
+    <!--  -->
+
+    <!-- поле с комментарием -->
+    <p class="mt-5 mb-0">Комментарий:</p>
+    <textarea name="" id="comment" cols="20" rows="5" class="border rounded border-gray-400 focus:outline-none w-full p-2"></textarea>
+    <!--  -->
+
+    <!-- проверка совместимости -->
+    <div class="flex flex-nowrap telegram_popup_info_check" style="height: 25px; justify-content: flex-start;">
+        <span class="">Проверка совместимости:</span>
+        <input class="ml-1" type="checkbox" id="is_compatible">
+    </div>
+    <!--  -->
+
+    <!-- кнопка отправить -->
+    <button class="telegram_popup_info__button py-2 px-5 border rounded-md border-white bg-blue-600 hover:bg-blue-400 text-white" onclick="sendDataTelegram()">Отправить</button>
+    <!--  -->
+</div>
+<!--  -->
+
+
+{% if request.user.is_anonymous %}
+<!-- попап с авторизациями -->
+<div id="authenticationsPopup" style="display: none;" class="close_popup telegram__info absolute message_popup z-10 w-96 bg-white border rounded border-white p-6 pt-8">
+    <img id="close_icon_email" style="left: 95%; top: -5%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer"
+    onclick="closePopup(this)">
+
+    <div class="flex">
+        <p class="mb-5 stem-medium text-base">Сервис поиска запчастей</p>
+        <p>К сожалению, не все продавцы настроили автоматическую выгрузку товаров. Попробуйте сделать запрос продавцам</p>
+        <a href="{% url 'login' %}" id="" class="block mx-2 my-5 border py-2 px-5 text-sm rounded-md border-gray-200 bg-white hover:bg-gray-200 text-black stem-medium" onclick="loginBtn()">Авторизоваться через Email</a>
+        <button id="" class="block mx-2 mb-5 border py-2 px-5 text-sm rounded-md border-gray-200 bg-white hover:bg-gray-200 text-black stem-medium" onclick="authenticateViaTelegram(this)">Авторизоваться через Telegram</button>
+        <p class="mt-5">Впервые на Geozip? <a href="{% url 'register' %}" class="text-blue-600" onclick="loginBtn()">Зарегистрируйтeсь</a> сейчас</p>
+        <p class="mt-10 text-xs">Регистрируясь на сайте Geozip, вы соглашаетесь на обработку персональных данных и принимаете условия <a href="/agreement/" class="underline underline-offset-4" target="_blank">Пользовательских соглашений</a> Geozip. <a href="/agreement/" class="underline underline-offset-4" target="_blank">Подробнее</a></p>
+    </div>
+</div>
+<!--  -->
+
+{% else %}
+
+<!-- попап с кнопками для получения предложений -->
+<div id="get_offers_btns" style="display: none;" class="close_popup center_popup absolute message_popup z-10 w-96 bg-white border rounded border-white p-6 pt-8">
+    <img id="close_icon_email" style="left: 95%; top: -5%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer"
+    onclick="closePopup(this)">
+
+    <div class="flex">
+        <p class="mb-3 stem-medium text-base">Сервис поиска запчастей</p>
+        <p class="mb-2">К сожалению, не все продавцы настроили автоматическую выгрузку товаров. Попробуйте сделать запрос продавцам</p>
+        <button id="" class="block mx-2 my-5 border py-2 px-5 text-sm rounded-md border-red-700 bg-red-700 hover:bg-red-400 text-white stem-medium" onclick="sendOffersEmail()">Сделать запрос по Email </button>
+        {% if is_telegram %}
+            <button id="" class="block mx-2 mb-5 border py-2 px-5 text-sm rounded-md border-red-700 bg-red-700 hover:bg-red-400 text-white stem-medium" onclick="openTelegramRequestForm()">Запросить наличие товара в розничных магазинах через Telegram-bot</button>
+        {% else %}
+            <button id="" class="block mx-2 mb-5 border py-2 px-5 text-sm rounded-md border-gray-200 bg-white hover:bg-gray-200 text-black stem-medium" onclick="authenticateViaTelegram(this)">Авторизоваться через Telegram</button>
+        {% endif %}
+    </div>
+</div>
+<!--  -->
+{% endif %}
+
+
+<!-- попап для авторизации через телеграм -->
+<div id="authenticateViaTelegramPopup" style="display: none;" class="close_popup center_popup absolute message_popup z-10 bg-white border rounded border-white p-6 pt-8">
+    <img id="close_icon_email" style="left: 95%; top: -5%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer"
+    onclick="closePopup(this)">
+    <p class="mb-4">Авторизация через Telegram</p>
+    <script async src="{{ telegram_url }}" data-telegram-login="{{ telegram_bot_name }}" data-size="large" data-userpic="false" data-radius="5" data-auth-url="{{ telegram_redirect_url }}" data-request-access="write"></script>
+</div>
+<!--  -->
+
+
+<!-- попап "Предложения будут отправлены в teleram" -->
+<div id="message_telegram_popup" style="display: none;" class="center_popup close_popup z-10 max-w-md h-44 bg-white border rounded border-white p-6 pt-8">
+    <img id="close_icon_email" style="left: 95%; top: -5%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closePopup(this)">
+    <span>Предложения будут отправлены в teleram. Проверьте сообщение в мессенджере.</span>
+    <a class="block text-center m-auto mt-5 text-blue-600" target="_blank" href="https://t.me/geozipbot" onclick="closeTelegramFrame()">Ссылка на telegram бота</a>
+</div>
+<!--  -->
+
+<script>
+    let closeTelegramFrame = () => {
+        tg.close();
+    }
+</script>

@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Доставка | №{{delivery.id}}{% endblock title %}
+{% block description %}Доставка | №{{delivery.id}}{% endblock description %}
+{% block content %}
+{% csrf_token %}
+
+    {% if delivery %}
+
+        {% include 'includes/shop_info_popup.html' %}
+
+        <!-- информация о статусах -->
+        <p id="cart_recipient_data_info" class="text-center"></p>
+        {% for message in messages %}
+            <p {% if message.tags == 'error' %}style="color: red;"{% endif %} id="shop_success" >{{ message }}</p>
+        {% endfor %}
+        <!--  -->
+
+        <!-- десктопная версия заказов -->
+        <table id="" class="hidden sm:table w-full text-xs sm:text-sm py-5 lg:px-5">
+
+            <tr id="cart_table_header" class="cart_table_header bg-gray-100">
+
+                <th class="w-6/12">
+                    <span class="block p-3 py-5 stem-medium text-align-left">
+                        <span class="block">№ доставки</span>
+                        <span class="block">Дата</span>
+                        <span class="block">Стоимость</span>
+                        <span class="block">Состав</span>
+                    </span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Статус</span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Доставка до</span>
+                </th>
+
+            </tr>
+
+            <tr height="50" id="" class="border-t">
+                <td class="p-3 py-1">
+                    <span class="p-3 py-1 text-align-left">
+                        <span class="block stem-medium">№ {{delivery.id}}</span>
+                        <span class="block">от {{delivery.created.date}}</span>
+                        <span class="block">стоимость: {{delivery.delivery_cost}} Р</span>
+                    </span>
+                </td>
+            </tr>
+
+            <tr height="50" id="" class="">
+                <td class="p-3 py-1 pt-0">
+                </td>
+
+                <td>
+                    <span id="DS_{{delivery.yandex_delivery_id}}" class="block p-3 py-1" style="text-align: center;">
+                        {{delivery.get_status_display}}
+                    </span>
+                </td>
+                <td>
+                    <span class="block p-3 py-1" style="text-align: center;">
+                        {% if delivery.status == 3 %}
+                            Отменен
+                        {% elif delivery.delivery_end %}
+                            {{delivery.delivery_end}}
+                        {% else %}
+                            {{delivery.delivery_period}}
+                        {% endif %}
+                    </span>
+                </td>
+                
+                {% for cart_item in delivery.cart_items.all %}
+                    <tr>
+                        <td>
+                            <span class="block p-3 py-1 pb-5" style="text-align: left;">
+                                <a href="#shop_info_popup" class="block stem-medium underline underline-offset-4 pb-1 cursor-pointer"
+                                data-shop_name="{{cart_item.shop.name}}"
+                                data-address="{% if cart_item.shop.address %}{{cart_item.shop.address}}{% else %}Не указан{% endif %}"
+                                data-site="{% if cart_item.shop.site %}{{cart_item.shop.site}}{% else %}Не указан{% endif %}"
+                                data-phone="{% if cart_item.shop.phone_number %}{{cart_item.shop.phone_number}}{% else %}Не указан{% endif %}"
+                                data-email="{% if cart_item.shop.email %}{{cart_item.shop.email}}{% else %}Не указан{% endif %}"
+                                data-description="{% if cart_item.shop.description %}{{cart_item.shop.description}}{% else %}Не указан{% endif %}"
+                                data-opening_hours="{% if cart_item.shop.opening_hours %}{{cart_item.shop.opening_hours}}{% else %}Не указан{% endif %}"
+                    
+                                data-lat="{% if cart_item.shop.lat %}{{cart_item.shop.lat}}{% else %}{% endif %}"
+                                data-lon="{% if cart_item.shop.lon %}{{cart_item.shop.lon}}{% else %}{% endif %}"
+                                onclick="openShopPage(this)"
+                                >Продавец: {{cart_item.shop}}</a>
+                                <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                <span class="block pb-1">{{cart_item.product_name}}</span>
+                                <span class="block">{{cart_item.get_cart_item_quantity_int}} шт</span>
+                            </span>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            </tr>
+
+            {% if delivery.status == 0 or delivery.status == 1 %}
+            <tr class="w-full bg-white">
+                <th colspan="20" style="text-align: right;">
+                    <button id="cancell_delivery_btn" class="inline-block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-delivery_id="{{delivery.id}}" onclick="cancellDelivery(this)" style="text-align: right;">Отменить доставку</button>
+                </th>
+            </tr>
+            {% endif %}
+
+            <tr class="w-full bg-white">
+                <th id="id_return_delivery" colspan="20" style="text-align: right;">
+
+                </th>
+            </tr>
+
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;" class="pb-10">
+                    <div class="p-3 py-1 pt-5 stem-medium">История доставки</div>
+                    <span class="block p-3 py-1 pt-3">Доставка №{{delivery.id}}</span>
+                    <div>
+                        <div class="p-3 py-1 pb-1">{{delivery.created}} - принят в обработку</div>
+                        <div class="p-3 py-1 pb-1">{{delivery.delivery_time_start}} - начало доставки</div>
+                        <div id="delivery_end" class="p-3 py-1 pb-1">
+                            {% if delivery.delivery_end %}
+                                {{delivery.delivery_end}} - завершена ({{delivery.get_status_display}})
+                            {% endif %}
+                        </div>
+                    </div>
+                </th>
+            </tr>
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;">
+                    <div class="p-3 py-1 stem-medium">Помощь с доставкой</div>
+                    <div class="p-3 py-1 cursor-pointer underline underline-offset-4"><a href="https://t.me/geozipchat" target="_blank">Написать в техподдержку</a></div>
+                </th>
+            </tr>
+
+        </table>
+        <!--  -->
+
+
+        <!-- мобильная версия заказов -->
+        <table id="" class="sm:hidden w-full text-xs sm:text-sm py-5 lg:px-5">
+            <tbody class="border-b">
+                <tr height="50" id="">
+                    <td class="p-3 py-1">
+                        <span class="p-3 py-1 text-align-left">
+                            <span class="block stem-medium">Доставка №{{delivery.id}}, от {{delivery.created.date}}</span>
+                            <span class="block">стоимость: {{delivery.delivery_cost}} P</span>
+                        </span>
+                    </td>
+                </tr>
+
+                <tr height="50" id="" class="">
+                    <td class="p-3 py-1 pt-0">
+                        <!-- <span class="text-align-left">
+                            Доставка №{{delivery.id}}
+                        </span> -->
+
+                        <span id="DS_{{delivery.yandex_delivery_id}}_mobile" class="block">статус: {{delivery.get_status_display}}</span>
+                        <span class="block">
+                            доставка до: 
+                            {% if delivery.status == 3 %}
+                                Отменен
+                            {% elif delivery.delivery_end %}
+                                {{delivery.delivery_end}}
+                            {% else %}
+                                {{delivery.delivery_period}}
+                            {% endif %}
+                        </span>
+                    </td>
+
+                </tr>
+
+                {% for cart_item in delivery.cart_items.all %}
+                    <tr id="" class="">
+                        <td>
+                            <span class="block p-3 py-1 pb-2" style="text-align: left;">
+                                <a href="#shop_info_popup" class="block stem-medium underline underline-offset-4"
+                                data-shop_name="{{cart_item.shop.name}}"
+                                data-address="{% if cart_item.shop.address %}{{cart_item.shop.address}}{% else %}Не указан{% endif %}"
+                                data-site="{% if cart_item.shop.site %}{{cart_item.shop.site}}{% else %}Не указан{% endif %}"
+                                data-phone="{% if cart_item.shop.phone_number %}{{cart_item.shop.phone_number}}{% else %}Не указан{% endif %}"
+                                data-email="{% if cart_item.shop.email %}{{cart_item.shop.email}}{% else %}Не указан{% endif %}"
+                                data-description="{% if cart_item.shop.description %}{{cart_item.shop.description}}{% else %}Не указан{% endif %}"
+                                data-opening_hours="{% if cart_item.shop.opening_hours %}{{cart_item.shop.opening_hours}}{% else %}Не указан{% endif %}"
+                    
+                                data-lat="{% if cart_item.shop.lat %}{{cart_item.shop.lat}}{% else %}{% endif %}"
+                                data-lon="{% if cart_item.shop.lon %}{{cart_item.shop.lon}}{% else %}{% endif %}"
+                                onclick="openShopPage(this)"
+                                >Продавец: {{cart_item.shop}}</a>
+                                <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                <span class="block">{{cart_item.product_name}}</span>
+                                <span class="pt-1 block">количество: {{cart_item.get_cart_item_quantity_int}} шт</span>
+                            </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                {% if delivery.status == 0 or delivery.status == 1 %}
+                <tr class="w-full bg-white">
+                    <th colspan="20" style="text-align: right;">
+                        <button id="cancell_delivery_btn_mobile" class="block my-5 mx-2 border py-2 px-3 text-xs rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-delivery_id="{{delivery.id}}" onclick="cancellDelivery(this)">Отменить доставку</button>
+                    </th>
+                </tr>
+                {% endif %}
+
+                <tr class="w-full bg-white">
+                    <th id="id_return_delivery_mobile" colspan="20" style="text-align: right;">
+
+                    </th>
+                </tr>
+
+            </tbody>
+
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;">
+                    <div class="p-3 py-1 pt-5 pb-0 stem-medium">История доставки</div>
+
+                    <span class="block p-3 py-1 pt-3">Доставка №{{delivery.id}}</span>
+                    <div class="pb-3">
+                        <div class="p-3 py-1 pb-1">{{delivery.created}} - принят в обработку</div>
+                        <div class="p-3 py-1 pb-1">{{delivery.delivery_time_start}} - начало доставки</div>
+                        <div id="delivery_end_mobile" class="p-3 py-1 pb-1">
+                            {% if delivery.delivery_end %}
+                                {{delivery.delivery_end}} - завершена ({{delivery.get_status_display}})
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </th>
+            </tr>
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;">
+                    <div class="p-3 py-1 pt-5 stem-medium">Помощь с доставкой</div>
+                    <div class="p-3 py-1 cursor-pointer underline underline-offset-4"><a href="https://t.me/geozipchat" target="_blank">Написать в техподдержку</a></div>
+                </th>
+            </tr>
+
+        </table>
+        <!--  -->
+
+
+    {% else %}
+        <div id="" class="w-11/12 mx-auto text-center bg-gray-100 mt-8 p-5 rounded">
+            Нет доставки.
+        </div>
+        <div id="" class="w-11/12 mx-auto text-center mt-8 p-5">
+            <a class="block text-blue-600 underline underline-offset-4" href="{% url 'cart:orders' %}">Вернуться к списку заказов.</a>
+        </div>
+    {% endif %}
+
+    <script>
+        const user_id = '{{request.user.id}}';
+        const delivery_end = '{{delivery.delivery_end}}';
+        const yandex_delivery_id = '{{delivery.yandex_delivery_id}}';
+        const delivery_id = '{{delivery.id}}';
+    </script>
+
+    <!-- яндекс карта js -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{YANDEX_GEO_TOKEN}}&lang=ru_RU"></script>
+    
+    <!-- <script src="{% static 'js/cart/orders.js' %}"></script> -->
+    <script src="{% static 'js/cart/delivery_script.js' %}"></script>
+    <script src="{% static 'js/cart/delete_delivery.js' %}"></script>
+    <script src="{% static 'js/open_shop_info_include.js' %}"></script>
+
+{% endblock content %}

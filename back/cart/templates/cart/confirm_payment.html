@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Оплата заказа | №{{order_id}}{% endblock title %}
+{% block description %}Оплата заказа | №{{order_id}}{% endblock description %}
+{% block content %}
+
+{% load static %}
+
+<!-- форма для заявки в телерам -->
+<form id="" class="h-96 close_popup center_popup z-10 w-11/12 md:max-w-md bg-white border rounded border-white p-6 pt-10 overflow-x-scroll text-xs sm:text-sm" method='POST' action={{action}}>
+    <!-- крестик для закрытия формы -->
+    <img id="close_icon_email" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closePopup(this)">
+    <!--  -->
+
+    <!-- заголовок формы -->
+    <span class="stem-medium text-lg">Подтверждение оплаты</span>
+    <!--  -->
+
+    <input type='hidden' name='sum' value='{{order.get_full_order_cost}}'/>
+    <input type='hidden' name='orderid' value='{{order_id}}'/>
+    <input type='hidden' name='clientid' value='{{order.cart.favorite_address.recipient_name}}'/>
+    <input type='hidden' name='service_name' value='Покупка запчасти'/>
+    <input type='hidden' name='cart' value='{{cart_check}}'/>
+
+    <!-- Номер заказа -->
+    <p class="mt-5 mb-0 text-align-left">
+        Номер заказа: №{{order_id}}
+    </p>
+    <!--  -->
+
+    <!-- Номер заказа -->
+    <p class="mt-5 mb-0 text-align-left">
+        ФИО получателя: {{order.cart.favorite_address.recipient_name}}
+    </p>
+    <!--  -->
+
+    <!-- Номер телефона -->
+    <p class="mt-5 mb-0 text-align-left">
+        Номер телефона: {{order.cart.favorite_address.phone}}
+    </p>
+    <!--  -->
+
+    <!-- Сумма оплаты -->
+    <p class="mt-5 mb-0 text-align-left">
+        Сумма оплаты: {{order.get_full_order_cost}} P
+    </p>
+    <!--  -->
+
+    <!-- Название услуги -->
+    <p class="mt-5 mb-0 text-align-left">
+        Название услуги: Покупка запчасти
+    </p>
+    <!--  -->
+
+    <!-- кнопка отправить -->
+    <button class="block telegram_popup_info__button mx-auto my-5 text-center py-2 px-5 border rounded-md border-white bg-blue-600 hover:bg-blue-400 text-white" style="margin-bottom: 1.5rem;">Перейти к оплате</button>
+    <!--  -->
+</form>
+<!--  -->
+
+<script>
+    document.querySelector('#overlay').style.display = 'block';
+
+    overlay.addEventListener('click', function(){
+        window.location.href = `${window.location.origin}/profile/user/cart/`;
+    })
+</script>
+{% endblock content %}

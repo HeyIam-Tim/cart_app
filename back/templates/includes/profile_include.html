@@ -1,0 +1,24 @@
+<!-- a dashbord of profile 'include' -->
+<div class="profile_include">
+    <div class="up_links">
+        <a href="{% url 'index' %}">Главная</a> &#8226;
+        <a style="margin-left: 3px;" href="{% url 'profile' %}">Личный кабинет</a>
+    </div>
+    <div class="profile">
+        <div class="profile-avatar">
+            <div class="profile-avatar__image">
+                <a href="{% url 'profile' %}">
+                    <h1>{{request.user.username|slice:"0:1"|title}}</h1>
+                </a>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a {% if request.path == '/profile/reviews/' %} style="color: rgb(17 24 39)" {% endif %} href="{% url 'profile-reviews' %}">Мои отзывы</a> 
+            <a {% if request.path == '/profile/notifications/' %} style="color: rgb(17 24 39)" {% endif %} href="{% url 'profile-notifications' %}">Уведомления</a> 
+            <a {% if request.path == '/profile/settings/' %} style="color: rgb(17 24 39)" {% endif %} href="{% url 'profile-settings' %}">Настройки</a>
+            <a {% if request.path == '/profile/business-account/' %} tsyle="color: rgb(17 24 39)" {% endif %} href="{% url 'profile-business-account' %}">Бизнес-аккаунт</a>
+            <a {% if request.path == '/profile/garage/' %} style="color: rgb(17 24 39)" {% endif %} href="{% url 'profile-garage' %}">Гараж</a>
+        </div>
+    </div>
+    <div class="link"></div>
+</div>

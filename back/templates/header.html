@@ -1,0 +1,260 @@
+{% load static %}
+<section class="container flex fd-col">
+
+    <!-- overlay для хедера -->
+    <div id="header_overlay" style="top: 0%; bottom: 92%; left: 0; right: 0; z-index: 1;" class="fixed opacity-0" onclick="mainContainerClick(this)"></div>
+    <!--  -->
+
+    <div class="top-head flex fd-row jc-sb" style="height: 100%;">
+        <div class="logo-location z-10" style="z-index: 2;">
+            <a href="{% url 'index' %}"><img class="logo-header" src="{% static 'images/logo_geozip.png' %}" alt="logogeozip"></a>
+            <div id="location_city" class="location_city flex fd-row ai-c" onclick="locationCityClick()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="#585858" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 0.833313C11.9891 0.833313 13.8968 1.62349 15.3033 3.03001C16.7098 4.43653 17.5 6.34419 17.5 8.33331C17.5 11.4383 15.1333 14.6916 10.5 18.1666C10.3558 18.2748 10.1803 18.3333 10 18.3333C9.81969 18.3333 9.64425 18.2748 9.5 18.1666C4.86667 14.6916 2.5 11.4383 2.5 8.33331C2.5 6.34419 3.29018 4.43653 4.6967 3.03001C6.10322 1.62349 8.01088 0.833313 10 0.833313ZM10 2.49998C8.4529 2.49998 6.96917 3.11456 5.87521 4.20852C4.78125 5.30249 4.16667 6.78622 4.16667 8.33331C4.16667 10.5916 5.93167 13.1966 9.54 16.0883L10 16.4516L10.46 16.0883C14.0683 13.1966 15.8333 10.5916 15.8333 8.33331C15.8333 6.78622 15.2188 5.30249 14.1248 4.20852C13.0308 3.11456 11.5471 2.49998 10 2.49998ZM10 6.66665C10.442 6.66665 10.866 6.84224 11.1785 7.1548C11.4911 7.46736 11.6667 7.89129 11.6667 8.33331C11.6667 8.77534 11.4911 9.19926 11.1785 9.51182C10.866 9.82438 10.442 9.99998 10 9.99998C9.55797 9.99998 9.13405 9.82438 8.82149 9.51182C8.50893 9.19926 8.33333 8.77534 8.33333 8.33331C8.33333 7.89129 8.50893 7.46736 8.82149 7.1548C9.13405 6.84224 9.55797 6.66665 10 6.66665Z" fill="#585858"></path>
+                </svg>
+                <small id="city_header" class="ml-1"></small>
+            </div>
+        </div>
+
+        <nav>
+
+            <div id="fd-row" class="flex fd-row">
+
+                <span id="" onclick="" class="mx-2 cursor-pointer block-inline z-10" style="z-index: 2;"><a href="{% url 'help-in-selection' %}" onclick="setHeaderHelpInSelectionHref()">Помощь в подборе</a></span>
+
+                <span id="" href="/catalog" class="relative cursor-pointer" onclick="showCatalogMenu(this)" style="z-index: 3;">
+                    Каталоги
+                    <div id="catalog_menu" class="close_popup close_on_click_main_container hidden w-64 absolute rounded-lg border bg-white" style="top: 155%; left: -135%; box-shadow: 0 4px 24px 0 rgba(0,0,0,.16),inset 0 -16px 16px 0 #fff;">
+                         <div class="flex flex-col py-4 px-3" style="align-items: flex-start;">
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/cars">Оригинальные запчасти</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/shiny">Шины</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/oil">Масла и автохимия</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/disky">Диски</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/accumulator">Аккумуляторы</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/accessories">Автоаксессуары</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/kolpaki">Колпаки</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/to">Каталог ТО</a>
+                             <a class="w-full hover:bg-gray-300 rounded-md p-1.5" style="margin: 0px;" href="/catalog/spares/bolty">Болты, гайки</a>
+                         </div>
+                     </div>
+                </span>
+
+
+
+                <!-- <span id="all_shops" onclick="allShops()" class="mx-2 cursor-pointer block-inline z-10" style="z-index: 2;">Магазины</span> -->
+
+                <div class="cart_order_count_displayed_parent hidden z-10" style="z-index: 2;">
+                    <a id="cart_page_header_id" href="{% url 'cart:cart' %}" class="m-0" style="margin-right: 0px;">Корзина</a>
+                    <small id=""class="cart_order_count_displayed rounded-full bg-gray-400 text-white text-xs leading-3 p-1 px-1.5 mr-2" style="top: -15%; left: 52%;">
+                        {% if request.user.cart.get_cart_items_count_all %}{{request.user.cart.get_cart_items_count_all}}
+                        {% else %}0{% endif %}
+                    </small>
+                </div>
+
+                {% if request.user.is_authenticated %}
+                    <a title="Избранное" href="{% url 'profile-garage' %}" class="z-10" style="z-index: 2;">Избранное</a>
+                    <a title="Заказы" href="{% url 'cart:orders' %}" class="z-10" style="z-index: 2;">Заказы</a>
+                {% endif %}
+
+                {% if request.user.is_authenticated %}
+                    <!-- <a class=" block-inline" href="{% url 'profile-business-account' %}">Для бизнеса</a> -->
+                    <div id="profile_link" class="z-10" style="z-index: 2;">
+                        <a href="{% url 'profile-business-account' %}" class="block-inline py-2 px-5 border rounded border-gray-300">{{request.user.username|title}}</a>
+                        <a href="{% url 'logout' %}" class="block-inline py-2 px-5 border rounded border-gray-300">Выйти</a>
+                    </div>
+                {% else %}
+                    <a id="enter-btn" href="{% url 'login' %}" class="block-inline py-2 px-5 border rounded border-gray-300 z-10" style="z-index: 2;" onclick="loginBtn()">Войти</a>
+                {% endif %}
+
+            </div>
+
+        </nav>
+    </div>
+
+    <!-- header mobile version -->
+    <div id="header_m" class="w-full mb-2 px-2">
+        <a class="header_m_logo" href="{% url 'index' %}"><img class="w-28" src="{% static 'images/logo_geozip.png' %}" alt="logogeozip"></a>
+        <button id="burger__button_open" class="burger-menu" onclick="openModal()">
+            <div class="burger-menu__button "></div>
+        </button>
+
+
+        <!-- заливка для закрытия бокового меню -->
+        <div  id="close_side_menu_overlay" class="hidden overlay" onclick="closeModal()"></div>
+        <!--  -->
+
+
+        <div id="side-menu"  class="side-nav">
+            <button class="on-change" onclick="closeModal()">
+                <div id="burger__button_close" ></div>
+            </button>
+            <div id="location_city_m" class="mb-4 ml-3 location cp" onclick="locationCityClickM(); checkLocation()">
+                <i class="fas fa-map-marker-alt text-white"></i>
+                <div class="inline text-white" id="city_header_m"></div>
+            </div>
+            <div class="mb-3 ml-3"><a href="{% url 'index' %}" class="text-white" >Главная</a></div>
+            <!-- <div class="mb-4 ml-3"><a href="/catalog" class="text-white" target="_blank">Каталоги</a></div> -->
+
+            <div id="side-nav_catalogs_list">
+                <button onclick="changeSlideNavCatalogs()" class="side-nav_footer_button">
+                    <p class="side-nav_footer_button">Каталоги</p>
+                    <div id="side-nav_catalogs_button_arrow" class="side-nav_footer_button_arrow">
+                    </div>
+                </button>
+                <ul id="side-nav_catalogs_ul" class="hidden flex-col">
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/cars">Оригинальные запчасти</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/shiny">Шины</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/oil">Масла и автохимия</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/disky">Диски</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/accumulator">Аккумуляторы</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/accessories">Автоаксессуары</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/kolpaki">Колпаки</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/to">Каталог ТО</a>
+                    <a class="block mb-3 ml-6 text-white" href="/catalog/spares/bolty">Болты, гайки</a>
+                </ul>
+            </div>
+
+            
+            <!-- <div class="ml-3"><span id="all_shopsM" onclick="allShops()" class="text-white cursor-pointer">Магазины</span></div> -->
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'profile-garage' %}" class="block mt-3 text-white ml-3">Избранное</a>
+                <a href="{% url 'cart:cart' %}" class="block mt-3 text-white ml-3">Корзина</a>
+                <a href="{% url 'cart:orders' %}" class="block mt-3 text-white ml-3">Заказы</a>
+            {% endif %}
+
+            {% if request.user.is_authenticated %}
+                <a class="block text-white ml-3 mt-3" href="{% url 'profile-business-account' %}">{{request.user.username|title}}</a>
+                <a class="block text-white ml-3 mt-3" href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+                <a id="enter-btn-m" class="block text-white ml-3 mt-3" href="{% url 'login' %}" onclick="loginBtn()">Войти</a>
+                <a id="" class="block text-white ml-3 mt-3" href="{% url 'cart:cart' %}">Корзина</a>
+            {%endif%}
+
+            <a class="block text-white ml-3 mt-3" href="{% url 'help-in-selection' %}" target="_blank" onclick="setHeaderHelpInSelectionHref()">Помощь в подборе</a>
+
+            <div class="side-nav_footer mt-3">
+                <button onclick="changeSlideNavFooter()" class="side-nav_footer_button">
+                    <p class="side-nav_footer_button">Подробнее</p>
+                    <div id="side-nav_footer_button_arrow" class="side-nav_footer_button_arrow">
+                    </div>
+                </button>
+                <ul id="pages_container_m" class="side-nav_footer_list flex flex-col"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function openModal() {
+            const open = document.querySelector('#burger__button_open');
+            const sideNav = document.querySelector('.side-nav')
+            const close = document.querySelector('#burger__button_close');
+            sideNav.style.width = '250px'
+            if (sideNav.style.width == '250px') {
+                close.style.display = 'block'
+            }
+
+            document.querySelector('#close_side_menu_overlay').style.display = 'block';
+
+        }
+
+        function closeModal() {
+            const close = document.querySelector('#burger__button_close');
+            const open = document.querySelector('#burger__button_open');
+            const sideNav = document.querySelector('.side-nav')
+            sideNav.style.width = '0px'
+            if (sideNav.style.width == '0px') {
+                open.style.display = 'block'
+                close.style.display = 'none'
+                
+            }
+
+            document.querySelector('#close_side_menu_overlay').style.display = 'none';
+
+        }
+        function changeSlideNav(){
+       
+          const close = document.querySelector('#burger__button_close');
+          const sideNav = document.querySelector('.side-nav')
+          sideNav.style.width = sideNav.style.width === '250px' ? '0px' : '250px'
+
+        //   if (sideNav.style.width == '250px') {
+        //     button.classList.remove('burger-menu__button')
+        //     button.classList.add('on-change')
+        //   }
+        //   else if (sideNav.style.width == '0px' && button.classList.contains('on-change')) {
+        //     button.classList.add('burger-menu__button')
+        //     button.classList.remove('on-change')
+        //   }
+        //   else {
+        //     button.classList.add('burger-menu__button')
+        //   }
+        }
+
+        function changeSlideNavFooter() {
+            const list = document.querySelector('.side-nav_footer');
+            const ul = document.querySelector('.side-nav_footer_list')
+            const arrow = document.querySelector('#side-nav_footer_button_arrow');
+            if (list.classList.contains('menu_footer') == false) {
+                list.classList.add('menu_footer')
+                ul.style.display = 'block'
+                arrow.style.transform = "rotate(224deg)"
+            }
+            else {
+                list.classList.remove('menu_footer');
+                ul.style.display = "none";
+                arrow.style.transform = "rotate(135deg)"
+            }
+        }
+
+
+        function changeSlideNavCatalogs() {
+            const list = document.querySelector('#side-nav_catalogs_list');
+            const ul = document.querySelector('#side-nav_catalogs_ul');
+            const arrow = document.querySelector('#side-nav_catalogs_button_arrow');
+            if (list.classList.contains('menu_footer') == false) {
+                list.classList.add('menu_footer')
+                ul.style.display = 'block'
+                arrow.style.transform = "rotate(224deg)"
+            }
+            else {
+                list.classList.remove('menu_footer');
+                ul.style.display = "none";
+                arrow.style.transform = "rotate(135deg)"
+            }
+        }
+    
+    
+      function checkLocation() {
+        const sideNav = document.querySelector('.side-nav')
+        sideNav.style.width = '0px';
+      }
+
+
+    //   записывает куда нужно переадресовывать после авторизации 
+      let loginBtn = () => {
+        localStorage.setItem('redirect_after_auth_to', window.location.href);
+      }
+
+
+    //   открывает/закрывает меню каталогов
+      let showCatalogMenu = (element) => {
+        if (document.querySelector('#catalog_menu').style.display == 'block') {
+            document.querySelector('#catalog_menu').style.display = 'none';
+        }
+        else {
+            document.querySelector('#catalog_menu').style.display = 'block';
+        }
+    }
+    //
+
+
+    // устанваливает href для помощи в подборе
+    let setHeaderHelpInSelectionHref = () => {
+        localStorage.setItem('header_help_in_selection_href', window.location.href);
+    }
+    //
+
+    </script>
+
+</section>

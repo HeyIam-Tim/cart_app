@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Заказ | №{{order.id}}{% endblock title %}
+{% block description %}Заказ | №{{order.id}}{% endblock description %}
+{% block content %}
+{% csrf_token %}
+
+    {% if order %}
+
+        {% include 'includes/shop_info_popup.html' %}
+
+        <!-- информация о статусах -->
+        <p id="cart_recipient_data_info" class="text-center"></p>
+        {% for message in messages %}
+            <p {% if message.tags == 'error' %}style="color: red;"{% endif %} id="shop_success" >{{ message }}</p>
+        {% endfor %}
+        <!--  -->
+
+        <!-- десктопная версия заказов -->
+        <table id="" class="hidden sm:table w-full text-xs sm:text-sm py-5 lg:px-5">
+
+            <tr id="cart_table_header" class="cart_table_header bg-gray-100">
+
+                <th class="w-6/12">
+                    <span class="block p-3 py-5 stem-medium text-align-left">
+                        <span class="block">№ заказа</span>
+                        <span class="block">Дата</span>
+                        <span class="block">Сумма</span>
+                        <span class="block">Состав</span>
+                    </span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Статус</span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Доставка</span>
+                </th>
+
+            </tr>
+
+            <tr height="50" id="" class="border-t">
+                <td class="p-3 py-1">
+                    <span class="p-3 py-1 text-align-left">
+
+                        <span class="block stem-medium">
+                            № {{order.id}}
+
+                            {% if not order.is_paid and order.is_new %}
+                                <div class="my-2">
+                                    <a class="text-red-600">Ожидает оплаты</a>
+                                    <div class="stem-light text-xs">
+                                        <span class="text-red-600">Внимание!</span> <span>Этот заказ будет автоматичеси отменен, если вы не оплатите его в течении 24 часов.</span>
+                                    </div>
+                                    <a id="" href="{% url 'cart:confirm-payment' %}?order_id={{order.id}}" class="inline-block m-1 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium">Оплатить</a>
+                                </div>
+                            {% endif %}
+
+                        </span>
+
+                        <span class="block">от {{order.created}}</span>
+                        <span class="block">сумма: {{order.get_full_order_cost}}</span>
+                    </span>
+                </td>
+            </tr>
+            {% for delivery in order.deliveries.all %}
+                <tr height="50" id="" class="">
+                    <td class="p-3 py-1 pt-0">
+                        <span class="text-align-left">
+                            {% if order.is_paid %}
+                                <!-- <a href="{% url 'cart:delivery' delivery.id %}" class="underline underline-offset-4">Доставка №{{delivery.id}}</a> -->
+                                <a href="#" class="underline underline-offset-4">Доставка №{{delivery.id}}</a>
+                            {% else %}
+                                <span class="">Доставка №{{delivery.id}}</span>
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <span id="DS_{{delivery.yandex_delivery_id}}" class="block p-3 py-1" style="text-align: center;">
+                            {{delivery.order.get_status_display}}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="block p-3 py-1" style="text-align: center;">
+                            {{delivery.delivery_period}}
+                        </span>
+                    </td>
+                    
+                    {% for cart_item in delivery.cart_items.all %}
+                        <tr>
+                            <td>
+                                <span class="block p-3 py-1 pb-5" style="text-align: left;">
+                                    <a href="#shop_info_popup" class="block stem-medium underline underline-offset-4 pb-1 cursor-pointer"
+                                    data-shop_name="{{cart_item.shop.name}}"
+                                    data-address="{% if cart_item.shop.address %}{{cart_item.shop.address}}{% else %}Не указан{% endif %}"
+                                    data-site="{% if cart_item.shop.site %}{{cart_item.shop.site}}{% else %}Не указан{% endif %}"
+                                    data-phone="{% if cart_item.shop.phone_number %}{{cart_item.shop.phone_number}}{% else %}Не указан{% endif %}"
+                                    data-email="{% if cart_item.shop.email %}{{cart_item.shop.email}}{% else %}Не указан{% endif %}"
+                                    data-description="{% if cart_item.shop.description %}{{cart_item.shop.description}}{% else %}Не указан{% endif %}"
+                                    data-opening_hours="{% if cart_item.shop.opening_hours %}{{cart_item.shop.opening_hours}}{% else %}Не указан{% endif %}"
+                        
+                                    data-lat="{% if cart_item.shop.lat %}{{cart_item.shop.lat}}{% else %}{% endif %}"
+                                    data-lon="{% if cart_item.shop.lon %}{{cart_item.shop.lon}}{% else %}{% endif %}"
+                                    onclick="openShopPage(this)"
+                                    >Продавец: {{cart_item.shop}}</a>
+                                    <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                    <span class="block pb-1">{{cart_item.product_name}}</span>
+                                    <span class="block">{{cart_item.get_cart_item_quantity_int}} шт</span>
+                                </span>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                </tr>
+
+                <!-- {% if delivery.status == 0 or delivery.status == 1 %}{% endif %} -->
+                {% if order.can_be_cancelled %}
+                <tr class="w-full bg-white">
+                    <th colspan="20" style="text-align: right;">
+                        <!-- {% if order.is_paid %}
+                            <button id="" class="inline-block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-delivery_id="{{delivery.id}}" onclick="cancellDelivery(this)" style="text-align: right;">Отменить доставку</button>
+                        {% else %}
+                            <button id="" class="inline-block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-gray-300 bg-white hover:bg-gray-300 text-black stem-medium" data-order_id="{{order.id}}" onclick="deleteOrder(this)" style="text-align: right;">Удалить заказ</button>
+                            <button id="" class="inline-block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-order_id="{{order.id}}" onclick="" style="text-align: right;">Оплатить заказ</button>
+                            <a href="mailto: geoziper@gmail.com" class="inline-block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium">Отменить заказ</a>
+                        {% endif %} -->
+
+                        <a href="mailto: geoziper@gmail.com" class="inline-block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium">Отменить заказ</a>
+
+                    </th>
+                </tr>
+                {% endif %}
+
+            {% endfor %}
+
+            <!-- История -->
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;" class="pb-10">
+                    <div class="p-3 py-1 pt-5 stem-medium">История заказа</div>
+                    {% for delivery in order.deliveries.all %}
+                    <span class="block p-3 py-1 pt-3">Доставка №{{delivery.id}}</span>
+                    <div>
+                        <div class="p-3 py-1 pb-1">{{delivery.created}} - принят в обработку</div>
+                        <div class="p-3 py-1 pb-1">{{delivery.delivery_time_start}} - начало доставки</div>
+                        {% if delivery.delivery_time_end %}
+                            <div class="p-3 py-1 pb-1">
+                                {{delivery.delivery_time_end}} - завершена ({{delivery.get_status_display}})
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </th>
+            </tr>
+            <!--  -->
+
+            <!-- чеки -->
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;" class="pb-10">
+                    <div class="p-3 py-1 pt-5 stem-medium">Чеки заказа</div>
+
+                    <div id="receipts"></div>
+
+                    <div id="receipts_info" class="p-3 py-1 pb-1">Здесь скоро появятся ваши чеки...</div>
+                </th>
+            </tr>
+            <!--  -->
+
+            <!-- Помощь -->
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;">
+                    <div class="p-3 py-1 stem-medium">Помощь с заказом</div>
+                    <div class="p-3 py-1 cursor-pointer underline underline-offset-4"><a href="https://t.me/geozipchat" target="_blank">Помощь специалиста Geozip</a></div>
+                </th>
+            </tr>
+            <!--  -->
+
+        </table>
+        <!--  -->
+
+
+        <!-- мобильная версия заказов -->
+        <table id="" class="sm:hidden w-full text-xs sm:text-sm py-5 lg:px-5">
+            <tbody class="border-b">
+                <tr height="50" id="">
+                    <td class="p-3 py-1">
+                        <span class="p-3 py-1 text-align-left">
+
+                            <span class="block stem-medium">
+                                Заказ №{{order.id}}, от {{order.created}}
+
+                                {% if not order.is_paid and order.is_new %}
+                                    <div class="my-2">
+                                        <a class="text-red-600">Ожидает оплаты</a>
+                                        <div class="stem-light text-xs">
+                                            <span class="text-red-600">Внимание!</span> <span>Этот заказ будет автоматичеси отменен, если вы не оплатите его в течении 24 часов.</span>
+                                        </div>
+                                        <a id="" href="{% url 'cart:confirm-payment' %}?order_id={{order.id}}" class="inline-block m-1 border py-2 px-3 text-xs rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium">Оплатить</a>
+                                    </div>
+                                {% endif %}
+
+                            </span>
+
+                            <span class="block">сумма: {{order.get_full_order_cost}}</span>
+                        </span>
+                    </td>
+                </tr>
+                {% for delivery in order.deliveries.all %}
+                    <tr height="50" id="" class="">
+                        <td class="p-3 py-1 pt-3">
+                            <span class="text-align-left">
+                                {% if order.is_paid %}
+                                    <!-- <a href="{% url 'cart:delivery' delivery.id %}" class="underline underline-offset-4">Доставка №{{delivery.id}}</a> -->
+                                    <a href="#" class="underline underline-offset-4">Доставка №{{delivery.id}}</a>
+                                {% else %}
+                                    <span class="">Доставка №{{delivery.id}}</span>
+                                {% endif %}
+                            </span>
+
+                            <span class="block">статус: {{delivery.get_status_display}}</span>
+                            <span id="DS_{{delivery.yandex_delivery_id}}" class="block">доставка: {{delivery.delivery_period}}</span>
+                        </td>
+
+                    </tr>
+
+                    {% for cart_item in order.cart_items.all %}
+                        <tr id="" class="">
+                            <td>
+                                <span class="block p-3 py-1 pb-2" style="text-align: left;">
+                                    <a href="#shop_info_popup" class="block stem-medium underline underline-offset-4"
+                                    data-shop_name="{{cart_item.shop.name}}"
+                                    data-address="{% if cart_item.shop.address %}{{cart_item.shop.address}}{% else %}Не указан{% endif %}"
+                                    data-site="{% if cart_item.shop.site %}{{cart_item.shop.site}}{% else %}Не указан{% endif %}"
+                                    data-phone="{% if cart_item.shop.phone_number %}{{cart_item.shop.phone_number}}{% else %}Не указан{% endif %}"
+                                    data-email="{% if cart_item.shop.email %}{{cart_item.shop.email}}{% else %}Не указан{% endif %}"
+                                    data-description="{% if cart_item.shop.description %}{{cart_item.shop.description}}{% else %}Не указан{% endif %}"
+                                    data-opening_hours="{% if cart_item.shop.opening_hours %}{{cart_item.shop.opening_hours}}{% else %}Не указан{% endif %}"
+                        
+                                    data-lat="{% if cart_item.shop.lat %}{{cart_item.shop.lat}}{% else %}{% endif %}"
+                                    data-lon="{% if cart_item.shop.lon %}{{cart_item.shop.lon}}{% else %}{% endif %}"
+                                    onclick="openShopPage(this)"
+                                    >Продавец: {{cart_item.shop}}</a>
+                                    <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                    <span class="block">{{cart_item.product_name}}</span>
+                                    <span class="pt-1 block">количество: {{cart_item.get_cart_item_quantity_int}} шт</span>
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    {% if order.can_be_cancelled %}
+                    <tr class="w-full bg-white">
+                        <th colspan="20" style="text-align: right;">
+                            <!-- {% if order.is_paid %}
+                                <button id="" class="block my-5 mx-2 border py-2 px-3 text-xs rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-delivery_id="{{delivery.id}}" onclick="cancellDelivery(this)">Отменить доставку</button>
+                            {% else %}
+                                <button id="" class="inline-block my-5 mx-1 border py-2 px-3 text-xs rounded-md border-gray-300 bg-white hover:bg-gray-300 text-black stem-medium" data-order_id="{{order.id}}" onclick="deleteOrder(this)" style="text-align: right;">Удалить</button>
+                                <button id="" class="inline-block my-5 mx-1 border py-2 px-3 text-xs rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-order_id="{{order.id}}" onclick="" style="text-align: right;">Оплатить</button>
+                                <a href="mailto: geoziper@gmail.com" class="inline-block my-5 mx-2 border py-2 px-3 text-xs rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium">Отменить заказ</a>
+                            {% endif %} -->
+    
+                            <a href="mailto: geoziper@gmail.com" class="inline-block my-5 mx-2 border py-2 px-3 text-xs rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium">Отменить заказ</a>
+    
+                        </th>
+                    </tr>
+                    {% endif %}
+
+                {% endfor %}
+            </tbody>
+
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;">
+                    <div class="p-3 py-1 pt-5 pb-0 stem-medium">История заказа</div>
+                    {% for delivery in order.deliveries.all %}
+                    <span class="block p-3 py-1 pt-3">Доставка №{{delivery.id}}</span>
+                    <div>
+                        <div class="p-3 py-1 pb-1">{{delivery.created}} - принят в обработку</div>
+                        <div class="p-3 py-1 pb-1">{{delivery.delivery_time_start}} - начало доставки</div>
+                        {% if delivery.delivery_time_end %}
+                            <div class="p-3 py-1 pb-1">
+                                {{delivery.delivery_time_end}} - завершена ({{delivery.get_status_display}})
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </th>
+            </tr>
+            <tr class="w-full bg-white border-t">
+                <th colspan="20" style="text-align: left;">
+                    <div class="p-3 py-1 pt-5 stem-medium">Помощь с заказом</div>
+                    <div class="p-3 py-1 cursor-pointer underline underline-offset-4"><a href="https://t.me/geozipchat" target="_blank">Помощь специалиста Geozip</a></div>
+                </th>
+            </tr>
+
+        </table>
+        <!--  -->
+
+
+    {% else %}
+        <div id="" class="w-11/12 mx-auto text-center bg-gray-100 mt-8 p-5 rounded">
+            Заказ пуст.
+        </div>
+        <div id="" class="w-11/12 mx-auto text-center mt-8 p-5">
+            <a class="block text-blue-600 underline underline-offset-4" href="{% url 'cart:orders' %}">Вернуться к списку заказов.</a>
+        </div>
+    {% endif %}
+
+    <script>
+        const user_id = '{{request.user.id}}';
+        const order_id = '{{order.id}}';
+    </script>
+
+    <!-- яндекс карта js -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{YANDEX_GEO_TOKEN}}&lang=ru_RU"></script>
+    
+    <script src="{% static 'js/cart/orders.js' %}"></script>
+    <script src="{% static 'js/cart/order.js' %}"></script>
+    <script src="{% static 'js/cart/delete_delivery.js' %}"></script>
+    <script src="{% static 'js/open_shop_info_include.js' %}"></script>
+
+{% endblock content %}

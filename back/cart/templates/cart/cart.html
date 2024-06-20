@@ -1,0 +1,399 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Корзина | {{request.user.username}}{% endblock title %}
+{% block description %}Корзина | {{request.user.username}}{% endblock description %}
+{% block content %}
+{% csrf_token %}
+
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+
+    <div class="mt-5">
+        <a href="/" class="text-blue-500 inline-block mr-2">Главная</a><span class="text-gray-400 inline-block mr-2">&#8226;</span><a href="{% url 'cart:cart' %}" class="inline-block mr-2">Корзина</a>
+    </div>
+
+    <p id="info_banner" class="text-xs sm:text-sm mx-auto text-center text-red-600">"Доставка товара с оптовых складов осуществляется на следующий день"</p>
+
+    {% if cart.get_cart_items %}
+        <!-- информация о статусах -->
+        <p id="cart_recipient_data_info" class="text-center"></p>
+        {% for message in messages %}
+            <p {% if message.tags == 'error' %}style="color: red;"{% endif %} id="shop_success" >{{ message }}</p>
+        {% endfor %}
+        <!--  -->
+
+        <!-- десктопная версия корзины -->
+        <table id="" class="hidden sm:table w-full text-xs sm:text-sm py-5 lg:px-5">
+            <tr class="w-full bg-white">
+                <!-- <th colspan="20" style="text-align: right;"><span class="cart_table_header block pt-5 pb-2 bg-white text-sm sm:text-base stem-medium cursor-pointer" onclick="showCartRecipientDataForm()">+ Добавить адрес доставки</span></th> -->
+            </tr>
+
+            <tr id="cart_table_header" class="cart_table_header bg-gray-100">
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-left">
+                        <span class="block">Магазин</span>
+                        <span class="block">Бренд Артикул</span>
+                        <span class="block">Описание</span>
+                    </span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Кол-во</span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Цена</span>
+                </th>
+
+                <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Сумма</span>
+                </th>
+
+                <th>
+                    <span><img class="block w-7 mx-auto" src="{% static 'images/Truck-Background.svg' %}" alt="грузовик"></span>
+                </th>
+
+                <!-- <th>
+                    <span class="block p-3 py-5 stem-medium text-align-center">Стоимость<br>доставки</span>
+                </th> -->
+
+                <th>
+                    <span><img class="block w-5 mx-auto" src="{% static 'images/comment-icon.svg' %}" alt="комментарий"></span>
+                </th>
+
+                <th>
+                    <input type="checkbox" name="" class="block w-10 mx-auto" id="cart_check_header" onclick="selectAllCartItems()">
+                </th>
+            </tr>
+
+                {% for shop_name, cart_items in cart.get_available_selected_cart_items_for_cart.items %}
+
+                    <tr class="w-full bg-white">
+                        <td colspan="20">
+                            <span class="block pb-1 pt-5 bg-white text-sm sm:text-base stem-medium cursor-pointer text-align-left sm:underline sm:underline-offset-4">
+                                <a href="{% url 'shop-public' %}?shop_name={{shop_name}}">{{shop_name}}</a></span>
+                        </td>
+                    </tr>
+        
+                    {% for cart_item in cart_items %}
+
+                        <tr id="" class="">
+                            <td class="w-5/12 py-2">
+                                <div style="justify-content: start;" class="flex">
+                                    <img class="w-2/12" src="{{cart_item.image_url}}" alt="">
+                                    <span class="w-10/12 inline-block p-3 py-2 text-align-left">
+                                        <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                        {{cart_item.product_name}}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="block p-3 py-2" style="text-align: center;">
+                                    {% if cart_item.action_for_state == 'Not Available' %}
+                                        <span class="block p-3 pу-2 pb-0 text-red-500 bg-white cursor-pointer" title="Нет в наличии" style="text-align: center;">Нет в наличии</span>
+                                    {% else %}
+                                        <input id="" type="number" min="0.0" value="{{cart_item.get_cart_item_quantity_int}}" class="w-16 h-8 p-2 inline border rounded border-gray-300 focus:outline-none text-xs sm:text-sm text-gray-600" data-cart_item_id="{{cart_item.cart_item_id}}" data-max_quantity="{{cart_item.max_quantity}}" data-is_selected="{{cart_item.is_selected}}" onkeyup="updateCartItemQuantity(this)">
+                                    {% endif %}
+                                </span>
+                            </td>
+        
+                            <td>
+                                <span class="block p-3 py-2" style="text-align: center;">
+                                    {% if cart_item.action_for_state == 'Calculate' %}
+                                        <img id="gif_spin" class="recalculate_price block mx-auto w-6" data-id="{{cart_item.id}}" style="text-align: center;" src="{% static 'images/giphy.gif' %}" alt="gif spin">
+                                    {% elif cart_item.action_for_state == 'Wait' %}
+                                        <img id="gif_spin" class="block mx-auto w-6" style="text-align: center;" src="{% static 'images/giphy.gif' %}" alt="gif spin">
+                                    {% elif cart_item.action_for_state == 'Not Available' %}
+                                        <span class="block p-3 pу-2" title="Неактивный" style="text-align: center;">-</span>
+                                    {% elif cart_item.action_for_state == 'Checkbox' %}
+                                        <div>
+                                            <span class="block">{{cart_item.price}}</span>
+                                            <span class="block text-{{cart_item.price_color}}-500 text-xs">{{cart_item.price_difference}}</span>
+                                        </div>
+                                    {% endif %}
+                                </span>
+                            </td>
+        
+                            <td>
+                                <span class="block p-3 py-2 stem-medium" style="text-align: center;">
+                                    {% if cart_item.action_for_state == 'Calculate' or cart_item.action_for_state == 'Wait' or cart_item.action_for_state == 'Not Available' %}
+                                        0,00
+                                    {% elif cart_item.action_for_state == 'Checkbox' %}
+                                        {{cart_item.get_cost}}
+                                    {% endif %}
+                                </span>
+                            </td>
+        
+                            <td>
+                                <span class="block p-3 py-2" style="text-align: center;">
+                                    {% if cart_item.action_for_state == 'Calculate' or cart_item.action_for_state == 'Wait' or cart_item.action_for_state == 'Not Available' %}
+                                        -
+                                    {% elif cart_item.action_for_state == 'Checkbox' %}
+                                        {{cart_item.delivery_period}}
+                                    {% endif %}
+                                </span>
+                            </td>
+        
+                            <!-- <td>
+                                <span class="block p-3 py-5" style="text-align: center;">
+                                    Стоимость<br>доставки
+                                </span>
+                            </td> -->
+        
+                            <td>
+                                <span>
+                                    {% if cart_item.comment %}
+                                    <img class="block w-5 mx-auto cursor-pointer" src="{% static 'images/comment-icon.svg' %}" alt="комментарий" data-cart_item_id="{{cart_item.cart_item_id}}" data-cart_item_comment="{{cart_item.comment}}" title="{{cart_item.comment}}" onclick="showAddCommentForm(this)">
+                                    {% else %}
+                                    <img class="block w-5 mx-auto cursor-pointer" src="{% static 'images/comment-icon-gray.svg' %}" alt="комментарий" data-cart_item_id="{{cart_item.cart_item_id}}" data-cart_item_comment="{{cart_item.comment}}" onclick="showAddCommentForm(this)">
+                                    {% endif %}
+                                </span>
+                            </td>
+
+                            <td id="cart_item_state_{{cart_item.id}}">
+                                <input type="checkbox" {% if cart_item.is_selected %}checked{% else %}{% endif %} name="" class="cart_item_check_{{cart_item.shop.id}} cart_item_check block w-10 mx-auto" id="" data-cart_item_id="{{cart_item.cart_item_id}}" onclick="selectCartItemSelf(this)">
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                    <tr class="w-full bg-white">
+                        <td colspan="20">
+                            <div class="flex justify-end" style="justify-content: end;">
+                                <button id="" class="block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium" data-shop_name="{{shop_name}}" onclick="showDeleteCartItemsPopup(this)">Удалить</button>
+                                <button id="" class="select_cart_items_for_one_shop_btn1 block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-gray-200 bg-gray-200 hover:bg-gray-400 text-black stem-medium" data-shop_name="{{shop_name}}" onclick="selectShopCartItems(this)">Выбрать все в магазине</button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+        </table>
+        <!--  -->
+
+
+        <!-- мобильная версия корзины -->
+        <table id="" class="sm:hidden w-full text-xs sm:text-sm py-5 lg:px-5">
+            {% for shop_name, cart_items in cart.get_available_selected_cart_items_for_cart.items %}
+
+                <tr class="w-full bg-white">
+                    <td colspan="20">
+                        <span class="block pb-1 pt-5 bg-white text-sm sm:text-base stem-medium cursor-pointer text-align-left sm:underline sm:underline-offset-4">{{shop_name}}</span>
+                    </td>
+                </tr>
+    
+                {% for cart_item in cart_items %}
+                    <tr id="" class="">
+                        <td class="w-3/12 py-2">
+                            <img class="" src="{{cart_item.image_url}}" alt="">
+                        </td>
+                        <td>
+                            <span class="block p-2" style="text-align: left;">
+                                <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                <span class="block">{{cart_item.product_name}}</span>
+                                
+                                <!-- цена -->
+                                <span class="block pt-0.5">
+                                    {% if cart_item.action_for_state == 'Calculate' or cart_item.action_for_state == 'Wait' or cart_item.action_for_state == 'Not Available' %}
+                                        Цена : 0,00
+                                    {% elif cart_item.action_for_state == 'Checkbox' %}
+                                        Цена : {{cart_item.price}} <span class="text-{{cart_item.price_color}}-500 text-xs">{{cart_item.price_difference}}</span>
+                                    {% endif %}
+                                </span>
+                                <!--  -->
+
+                                <span class="block stem-medium pt-0.5">
+                                    {% if cart_item.action_for_state == 'Calculate' or cart_item.action_for_state == 'Wait' or cart_item.action_for_state == 'Not Available' %}
+                                        Сумма : 0,00
+                                    {% elif cart_item.action_for_state == 'Checkbox' %}
+                                        Сумма: {{cart_item.get_cost}}
+                                    {% endif %}
+                                </span>
+
+                                <span class="block pt-0.5">
+                                    {% if cart_item.action_for_state == 'Calculate' or cart_item.action_for_state == 'Wait' or cart_item.action_for_state == 'Not Available' %}
+                                        Доставка : -
+                                    {% elif cart_item.action_for_state == 'Checkbox' %}
+                                        Доставка : {{cart_item.delivery_period}} ч
+                                    {% endif %}
+                                </span>
+
+                                <span>
+                                    {% if cart_item.action_for_state == 'Not Available'%}
+                                        <span class="text-red-500 text-xs">Нет в наличии</span>
+                                    {% else %}
+                                        <input id="" type="number" min="0.0" value="{{cart_item.get_cart_item_quantity_int}}" class="inline-block w-14 mt-1 p-1 px-2 border rounded border-gray-300 focus:outline-none text-xs sm:text-sm text-gray-600" data-cart_item_id="{{cart_item.cart_item_id}}" data-max_quantity="{{cart_item.max_quantity}}" data-is_selected="{{cart_item.is_selected}}"  onkeyup="updateCartItemQuantity(this)">
+                                    {% endif %}
+                                </span>
+
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="block p-3 py-2" style="text-align: center;">
+
+                                <span id="cart_item_state_mobile_{{cart_item.id}}">
+                                    {% if cart_item.action_for_state == 'Checkbox' or cart_item.action_for_state == 'Not Available' %}
+                                        <input type="checkbox" {% if cart_item.is_selected %}checked{% else %}{% endif %} name="" class="cart_item_check_{{cart_item.shop.id}} cart_item_check block w-10 mx-auto" id="" data-cart_item_id="{{cart_item.cart_item_id}}" onclick="selectCartItemSelf(this)">
+                                    {% else %}
+                                        <img id="gif_spin" class="block mx-auto w-6" style="text-align: center;" src="{% static 'images/giphy.gif' %}" alt="gif spin">
+                                    {% endif %}
+                                </span>
+
+                                <span>
+                                    {% if cart_item.comment %}
+                                    <img class="block mt-3 w-4 mx-auto" src="{% static 'images/comment-icon.svg' %}" alt="комментарий" data-cart_item_id="{{cart_item.cart_item_id}}" data-cart_item_comment="{{cart_item.comment}}" onclick="showAddCommentForm(this)">
+                                    {% else %}
+                                    <img class="block mt-3 w-4 mx-auto" src="{% static 'images/comment-icon-gray.svg' %}" alt="комментарий" data-cart_item_id="{{cart_item.cart_item_id}}" data-cart_item_comment="{{cart_item.comment}}" onclick="showAddCommentForm(this)">
+                                    {% endif %}
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr class="w-full bg-white">
+                    <td colspan="20">
+                        <div class="flex justify-end" style="justify-content: end;">
+                            <button id="" class="block my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white" data-shop_name="{{shop_name}}" onclick="showDeleteCartItemsPopup(this)">Удалить</button>
+                            <button id="" class="select_cart_items_for_one_shop_btn1 my-5 mx-2 border py-2 px-5 text-sm rounded-md border-gray-200 bg-gray-200 hover:bg-gray-400 text-black" data-shop_name="{{shop_name}}" onclick="selectShopCartItems(this)">Выбрать все в магазине</button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <!--  -->
+
+
+        <!-- Итого -->
+        <div class="stem-medium text-xs sm:text-sm mt-10">
+            <div class="flex">
+                <p id="cart_items_count_total" style="text-align: right;" class="w-6/12 sm:w-5/12 mr-1 sm:mr-2"><span class="stem-light">Выбрано:</span> {{cart.get_selected_cart_items_number}} позиции ({{cart.get_selected_cart_items_count}} шт)</p>
+                <p id="cart_cost_total" class="w-5/12 ml-1 sm:ml-2 text-align-left"><span class="stem-light">на сумму:</span> {{cart.get_total_cost_for_selected}} Р</p>
+            </div>
+
+            <div class="flex"><p style="text-align: right;" class="w-6/12 sm:w-5/12 mr-1 sm:mr-3"><span class="stem-light">Итого:</span></p><p id="main_total" class="w-5/12 ml-1 sm:ml-3 text-align-left">{{cart.get_total_cost_for_selected}} Р</p></div>
+
+            <div class="flex">
+                <button id="select_all_cart_items_btn1" class="block mx-2 my-5 border py-2 px-5 text-sm rounded-md border-gray-200 bg-gray-200 hover:bg-gray-400 text-black stem-medium" onclick="selectAllCartItems()">Выбрать все</button>
+                <span id="make_order_btn" class="my-5 mx-2 border py-2 px-5 text-sm rounded-md border-red-300 bg-red-500 hover:bg-red-300 text-white stem-medium cursor-pointer" data-shop_name="{{shop_name}}"
+                {% if cart.get_selected_cart_items_number > 0 %}style="display: block;"{% else %}style="display: none;"{% endif %} target="_blank" onclick="goToCreateOrderPage()">К офомлению</span>
+            </div>
+        </div>
+        <!--  -->
+
+    {% else %}
+        {% if request.user.is_authenticated %}
+            <div id="" class="w-11/12 mx-auto text-center bg-gray-100 mt-8 p-5 rounded">
+                Товары для оформления в корзине отсутствуют.
+            </div>
+        {% else %}
+            <!-- информация о статусах -->
+            <p id="cart_item_update_info" class="text-green-600 text-center"></p>
+            <!--  -->
+
+            <!-- данные для корзины из куки -->
+                <div id="cart_data_cookie"></div>
+            <!--  -->
+        {% endif %}
+    {% endif %}
+
+
+    <!-- форма для адреса -->
+        {% include 'cart/cart_address_form_include.html' %}
+    <!--  -->
+
+
+    <!-- форма для комментария -->
+    <div id="cart_item_comment_form" class="close_popup center_popup z-10 max-w-sm bg-white border rounded border-white p-6 pt-10 hidden">
+        <!-- крестик для закрытия формы -->
+        <img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closeCartItemCommentForm()">
+        <!--  -->
+        
+        <!-- заголовок формы -->
+        <span class="block text-base text-center stem-medium">Редактировать комментарий</span>
+        <!--  -->
+        
+        <!-- инпут -->
+        <textarea id="cart_item_comment_input" name="" id="" cols="40" rows="10" class="mt-5 border rounded border-gray-300 focus:outline-none p-2"></textarea>
+        <!--  -->
+
+        <!-- кнопки -->
+        <div class="flex mt-3">
+            <span id="" class="mx-1 py-2 px-5 text-sm rounded-md border-red-500 bg-red-500 hover:bg-red-300 text-white cursor-pointer" onclick="deleteCartItemComment()">Удалить</span>
+            <span id="" class="mx-1 py-2 px-5 text-sm rounded-md border-gray-300 bg-gray-300 hover:bg-gray-400 text-black cursor-pointer" onclick="addCartItemComment()">Сохранить</span>
+        </div>
+        <!--  -->
+    </div>
+    <!--  -->
+
+
+    <!-- попап удалить -->
+    <div id="cart_delete_popup" class="close_popup center_popup z-10 bg-white border rounded border-white p-6 pt-10 hidden">
+        <!-- крестик для закрытия формы -->
+        <img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closePopup(this)">
+        <!--  -->
+        
+        <!-- заголовок формы -->
+        <span class="block text-base text-center stem-medium">Удалить товар/ы</span>
+        <!--  -->
+        
+        <!-- кнопки -->
+        <div class="flex mt-5 flex-nowrap stem-medium">
+            <span id="" class="mx-1 py-2 px-5 text-sm rounded-md border-red-500 bg-red-500 hover:bg-red-300 text-white cursor-pointer" onclick="deleteCartItems()">Удалить</span>
+            <span id="" class="mx-1 py-2 px-5 text-sm rounded-md border-gray-300 bg-gray-300 hover:bg-gray-400 text-black cursor-pointer" onclick="closeCartItemDeletePopup()">Отмена</span>
+        </div>
+        <!--  -->
+    </div>
+    <!--  -->
+
+
+    <!-- попап с предложением авторизоваться если пользоатель не авторизован -->
+    <div id="cookie_authorize_popup" class="close_popup center_popup z-10 bg-white border rounded border-white p-6 pt-10 hidden">
+        <!-- крестик для закрытия -->
+        <img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closePopup(this)">
+        <!--  -->
+        
+        <!-- заголовок -->
+        <span class="block text-base text-center stem-medium my-5">
+            Для офомления заказа необходимо войти на сайт.
+        </span>
+        <!--  -->
+        
+        <!-- кнопки -->
+        <div class="flex my-5 mt-8 flex-nowrap stem-medium">
+            <a id="" class="mx-1 py-2 px-5 text-sm rounded-md border-red-500 bg-red-500 hover:bg-red-300 text-white cursor-pointer" href="{% url 'login' %}" onclick="loginBtn()">Войти</a>
+            <span id="" class="mx-1 py-2 px-5 text-sm rounded-md border-gray-300 bg-gray-300 hover:bg-gray-400 text-black cursor-pointer" onclick="closeCookieAuthorizePopup()">Отмена</span>
+        </div>
+        <!--  -->
+    </div>
+    <!--  -->
+
+
+    <!-- js -->
+        <script>
+            const cart_id = '{{request.user.cart.id}}';
+            const cart_items_number = '{{cart.get_cart_items_number}}';
+            const cart_items_count_total = '{{cart.get_cart_items_count}}';
+            const cart_cost_total = '{{cart.get_total_cost}}';
+            const delivery_address = 'False';
+        </script>
+
+        <!-- imask -->
+        <!-- <script src="https://unpkg.com/imask"></script> -->
+        <!-- <script src="{% static 'js/cart/imask.js' %}"></script> -->
+        <!--  -->
+
+        <script src="{% static 'js/cart/cart.js' %}"></script>
+        <script src="{% static 'js/cart/update_quantity.js' %}"></script>
+        <script src="{% static 'js/cart/cart_address_form_include.js' %}"></script>
+        <script src="{% static 'js/suggest_addresses.js' %}"></script>
+    <!--  -->
+{% endblock content %}

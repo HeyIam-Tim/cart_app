@@ -1,0 +1,33 @@
+<!-- a dashbord of a shop 'include' -->
+<div class="shop_include flex fd-col ai-fs">
+
+    <div class="up_links">
+        <a href="{% url 'index' %}">Главная</a> &#8226;
+        <a href="{% url 'profile' %}">Личный кабинет</a> &#8226;
+        <a href="#">{{shop.name}}</a>
+    </div>
+
+    <div class="dashboard_p flex fd-row">
+        <div class="avatar flex fd-row jc-se flex-nowrap">
+            <a href="{% url 'shop' shop.id %}"><h1>{{shop.name|slice:"0:1"|title}}</h1></a>
+            <!-- <img id="avatar_img" src="{{request.user.customuser.image.url}}" alt="avatar"> -->
+            <div class="user_info">
+                <p>{{shop.name}}</p>
+                <i id="star" class="fas fa-star"></i>
+                <i id="star" class="fas fa-star"></i>
+                <i id="star" class="fas fa-star"></i>
+                <i id="star" class="fas fa-star"></i>
+                <i id="star" class="fas fa-star"></i>
+            </div>
+        </div>
+        <div class="action_links">
+            <a {% if request.path == shop_products_url %}style="color: #333;"{% endif %} href="{% url 'shop-products' shop.id %}">Товары {{shop.name}}</a>
+            <!-- <a {% if request.path == statistics_url %}style="color: #333;"{% endif %} href="{% url 'shop-statistics' shop.id %}">Статистика</a> -->
+            <!-- <a {% if request.path == reviews_url %}style="color: #333;"{% endif %} href="{% url 'shop-reviews' shop.id %}">Отзывы</a> -->
+            <!-- <br> -->
+            <a {% if request.path == settings_url %}style="color: #333;"{% endif %} href="{% url 'shop-settings' shop.id %}">Настройки</a>
+            <!-- <a href="{% url 'delete-shop' shop.id %}">Удалить магазин</a> -->
+        </div>
+    </div>
+
+</div>

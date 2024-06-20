@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="{% block description %}{% endblock description %}">
+    <meta name="keywords" content="запчасти, автомобили, подбор, предложения, цены, адреса, склады, магазины">
+    
+
+    <!-- {% if request.path != '/profile/login/' and request.path != '/profile/logout/' and request.path != '/profile/register/' and request.path != '/reset_password/' and request.path != '/reset_password_sent/' and request.path != '/reset_password_complete/' and request.path != '/reset/MQ/set-password/' %} -->
+        <!-- Yandex.Metrika counter -->
+        {% include 'yandex_metrika.html' %}
+    <!-- {% endif %} -->
+
+
+    <meta name="yandex-verification" content="6a2f5dcbcf30595b" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+    <title>{% block title %}{% endblock title %}</title>
+    
+    <!-- tailwind -->
+    <link rel="stylesheet" href="{% static 'css/tailwindoutput.css' %}">
+    
+    <!-- css -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+
+<!-- Гугл аналитика -->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FT3XKMKN68"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FT3XKMKN68');
+</script>
+
+
+<body>
+    <!-- overlay -->
+    <div id="overlay" style="display: none;" class="overlay"></div>
+
+    <header class="h-80">
+        {% include 'header.html' %}
+    </header>
+
+    <div id="container" class="container" onclick="mainContainerClick(this)">
+        {% block content %}
+        {% endblock content %}
+    </div>
+
+    {% include 'includes/cities_popup.html' %}
+
+    <footer>
+        {% include 'footer.html' %}
+    </footer>
+</body>
+
+<script>
+    const username = '{{request.user.username | title}}';
+    const isAnonymous = '{{request.user.is_anonymous}}';
+
+    let is_authenticated = '{{request.user.is_authenticated}}';
+    let is_anonymous = '{{request.user.is_anonymous}}'
+
+    let cart_items_count = '{% if request.user.cart.get_cart_items_count_all %}{{request.user.cart.get_cart_items_count_all}}{% else %}0{% endif %}'
+
+</script>
+
+<script src="{% static 'js/local.js' %}"></script>
+<script src="{% static 'js/base.js' %}"></script>
+<script src="{% static 'js/search_city.js' %}"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+</html>
+

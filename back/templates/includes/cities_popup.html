@@ -1,0 +1,35 @@
+{% load static %}
+
+<!-- city popup -->
+<div id="cities_popup" class="cities_popup card">
+    <div class="city_card flex fd-col">
+
+        <div id="autocomplete" class="search_area flex  autocomplete">
+            <input class="search_city autocomplete-input" type="text" name="" id="search_city"
+                placeholder="Введите название города" onkeyup="searchCityName()">
+            <ul class="autocomplete-result-list"></ul>
+            <img id="close-icon-c" src="{% static 'images/close-icon.png' %}" alt="closeicon" onclick="closeCityPopup()">
+        </div>
+
+        <!-- выпадающий список с подсказками для городов-->
+        <div id="input_cities" style="display: none;"></div>
+
+        <div id="cc_area" class="cc_area flex fd-row ai-fs">
+
+            <div class="wrapper_region flex fd-col ai-fs">
+                <div class="header">Регион</div>
+                <div id="region_list" class="region_list flex fd-col ai-fs">
+                    <!-- region list -->
+                </div>
+            </div>
+
+            <div class="wrapper_city flex fd-col ai-fs">
+                <div class="header">Город</div>
+                <div id="city_list" class="city_list flex fd-col ai-fs">
+                    <!-- city list -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

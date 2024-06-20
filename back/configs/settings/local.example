@@ -1,0 +1,196 @@
+from pathlib import Path
+import os
+from enum import Enum
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+DEBUG = True
+
+ALLOWED_HOSTS = ["*"]
+
+SECRET_KEY = '***'
+
+HASH_KEY = b's6fJYwGxj_yJZWFycwphxNKMMTVfEM7ofyD1cxAKpb0='
+
+DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': '',
+#        'USER': '',
+#        'PASSWORD': '',
+#        'HOST': '',
+#        'DB_PORT': ,
+#    },
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media/')
+
+
+SOCIAL_AUTH_URL_NAMESPACE = ''
+SOCIAL_AUTH_VK_OAUTH2_KEY = ''
+SOCIAL_AUTH_VK_OAUTH2_SECRET = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = ''
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = ''
+SOCIAL_AUTH_FACEBOOK_KEY = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
+
+
+# SMTP Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+
+# переменные для ABCP
+ABCP_URL = ''
+ABCP_LOGIN = ''
+ABCP_PASSWORD_MD5 = ''
+
+# переменные для Zzap
+ZZAP_URL = '***'
+ZZAP_LOGIN = '***'
+ZZAP_PASSWORD = '***'
+ZZAP_API_KEY = '***'
+ZZAP_SERVER_URL = '***'
+
+# переменные для ядра проекта
+CORE_URL = '***'
+
+
+# для mqtt
+MQTT_USERNAME = '***'
+MQTT_PASSWORD = '***'
+
+
+# для fapi
+FAPI_TOKEN = '***'
+
+
+# для recaptcha
+RECAPTCHA_SECRET = ''
+RECAPTCHA_URL = ''
+
+
+# для retailrocket
+RETAILROCKET_TOKEN = '***'
+
+
+# loguru
+LOGURU_FILE = 'full/path/to/log/file'
+
+
+# telegram variables
+TELEGRAM_BOT_TOKEN = '***'
+TELEGRAM_BOT_NAME = '***'
+TELEGRAM_BOT_TOKEN_COORDINATES = '***'
+TELEGRAM_REDIRECT_URL = '***'
+
+TELEGRAM_WEBHOOK_BUYER = ''
+TELEGRAM_WEBHOOK_SELLER = ''
+TELEGRAM_GEOZIP_GROUP_ID = ''
+
+
+# docpart
+DOCPART_LOGIN = ''
+DOCPART_PASSWORD = ''
+
+
+# acat
+ACAT_TOKEN = ''
+
+
+# ftp
+FTP_HOST = ''
+FTP_USER = ''
+FTP_PASSWORD = ''
+
+
+# yandex
+YANDEX_TOKEN = ''
+YANDEX_GEO_TOKEN = ''
+
+# коммисия %
+COMMISSION = 5
+COMMISSION_AVITO = 5
+
+
+# npm api key
+KEY_NPM = 'secret_uuid'
+NPM_LOG_FILE = ''
+
+
+# логопас для армтека
+ARMTEK_LOGIN=''
+ARMTEK_PASSWORD=''
+
+
+# paykeeper
+SECRET_SEED = ''
+
+
+# Список с админ группами.
+class AdminGroupKeys(Enum):
+    """Список с админ группами."""
+
+    ADMIN_ORDERS = ('secret_uuid', 'Менеджер заказов')
+
+
+# api для автоевро
+API_KEY_AUTOEURO = ''
+
+
+# стоимость доставки по умолчанию
+DELIVERY_PRICE_DEFAULT = 500
+
+
+# ссылка на эквайринг для оплаты
+ACTION_HTML_FOR_PAYMENT = 'https://geozip.server.paykeeper.ru/create/'
+ACTION_HTML_FOR_PAYMENT_DEMO = 'https://demo.paykeeper.ru/create/'
+
+
+# время достваки по умолчанию
+DELIVERY_PERIOD_HOURS_DEFAULT = 24
+
+
+# сервисный сбор
+SERVICE_FEE = '199.99'
+
+
+# СДЭК логопас
+ACCOUNT = ''
+SECRET_PASSWORD = ''
+
+
+# логопас Paykeeper
+LOGIN_PAYKEEPER = ''
+PASSWORD_PAYKEEPER = ''
+
+# автотрейд апи ключ
+AUTOTRADE_API_KEY = ''
+
+
+# СДЕК
+CDEK_CLIENT_ID = ''
+CDEK_CLIENT_SECRET = ''
+
+
+# автотрейд апи ключ
+AUTOTRADE_API_KEY = ''
+
+
+OFFERS_COUNT_TO_FILE = 10
+OFFERS_LIMIT = 10
+AVITO_FEEDS_FILEPATH = '/.../../feeds.xlsx'
+
+
+ORENBURG_ID = '13569'
+
+
+COLLECTOR_OFFERS_TIMEOUT = 5

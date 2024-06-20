@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Офомление заказа | {{request.user.username}}{% endblock title %}
+{% block description %}Офомление заказа | {{request.user.username}}{% endblock description %}
+{% block content %}
+{% csrf_token %}
+
+    <!-- навигация -->
+    <div class="mt-5">
+        <a href="/" class="text-blue-500 inline-block mr-2">Главная</a><span class="text-gray-400 inline-block mr-2">&#8226;</span>
+        <a href="{% url 'cart:cart' %}" class="text-blue-500 inline-block mr-2">Корзина</a><span class="text-gray-400 inline-block mr-2">&#8226;</span>
+        <a href="{% url 'cart:create-order' %}" class="inline-block mr-2">Оформление заказа</a>
+    </div>
+    <!--  -->
+
+    {% if cart.get_selected_cart_items_ordered_by_shops %}
+        <!-- информация о статусах -->
+        <p id="cart_recipient_data_info" class="text-center"></p>
+        {% for message in messages %}
+            <p {% if message.tags == 'error' %}style="color: red;"{% endif %} id="shop_success" >{{ message }}</p>
+        {% endfor %}
+        <!--  -->
+
+        <!-- адрес доставки -->
+        <div class="w-full mt-5 text-xs sm:text-sm">
+            <div class="border-gray-100 p-3 py-5 bg-gray-100 rounded-md stem-medium">Адрес доставки</div>
+            {% if cart.favorite_address %}
+                <div class="block sm:flex px-3 my-5" style="justify-content: space-between; align-items: center;">
+                    <div class="mb-3 sm:mb-0">
+                        <p class="stem-medium my-0">{{cart.favorite_address.recipient_name}}</p>
+                        <!-- <p class="stem-medium my-0 mt-2">{% if cart.favorite_address.postal_code %}Отделение почты России {{cart.favorite_address.postal_code}}{% else %}{% endif %}</p> -->
+                        <p class="my-0">{{cart.favorite_address.address_delivery}}</p>
+                        <p class="my-1 text-red-600 cursor-pointer" onclick="openDeliveryAddressesPopup()">{% if not cart.favorite_address.is_valid_address %}Неверный адрес{% endif %}</p>
+                    </div>
+                    <div>
+                        <!-- <p class="stem-medium my-0 mb-1 sm:mb-2">До {{cart.favorite_address.delivery_time}},  494,00 Р</p> -->
+                        <p class="stem-medium my-0 mb-1 sm:mb-2">Доставка до {{cart.favorite_address.delivery_time}}</p>
+                        <a class="text-blue-500 cursor-pointer" onclick="openDeliveryAddressesPopup()">Выбрать другой адрес</a>
+                    </div>
+                </div>
+            {% else %}
+            <a class="inline-block w-full my-5 mb-2 px-3 text-blue-500 cursor-pointer" onclick="showCartRecipientDataForm()">+ Добавить новый адрес доставки*</a>
+            <a class="inline-block w-full my-5 mt-0 px-3 text-red-600 text-sm">Адрес доставки не выбран</a>
+            {% endif %}
+        </div>
+        <!--  -->
+
+
+        <!-- Способ оплаты -->
+        <!-- <div class="w-full mt-0 text-xs sm:text-sm">
+            <div class="border-gray-100 p-3 py-5 bg-gray-100 rounded-md stem-medium">Способ оплаты</div>
+            <div class="flex px-3 my-5" style="justify-content: space-between;">
+                <a class="inline-block text-blue-500 my-1 sm:my-0 cursor-pointer">+ Выберите способ оплаты</a>
+                <a class="inline-block text-blue-500 my-1 sm:my-0 cursor-pointer">+ Изменить способ оплаты</a>
+            </div>
+        </div> -->
+        <!--  -->
+
+
+        <!-- Состав заказа -->
+        <div class="w-full mt-5 text-xs sm:text-sm">
+            <div class="border-gray-100 p-3 py-5 bg-gray-100 rounded-md stem-medium">Состав заказа</div>
+
+            <!-- таблица с товарами -->
+            <table id="" class="w-full text-xs sm:text-sm py-5 lg:px-5">
+                {% for web_shop_site, cart_items_by_web_shop in cart.get_available_selected_cart_items.items %}
+                    <tbody class="">
+                        {% for shop_name, cart_items in cart_items_by_web_shop %}
+    
+                        <tbody class="relative one_shop_cart_item">
+                            <td class="hidden shop_overlay absolute bg-black inset-0 rounded opacity-50"></td>
+    
+                            <!-- наименование магазина -->
+                            <tr class="w-full bg-white">
+                                <td colspan="20">
+                                    <span class="block pb-1 pt-5 bg-white text-sm sm:text-base stem-medium cursor-pointer text-align-left">{{shop_name}}</span>
+                                </td>
+                            </tr>
+                            <!--  -->
+    
+                            {% for cart_item in cart_items %}
+                                <tr class="">
+                                    <td class="w-6/12 py-2">
+                                        <div style="justify-content: start;" class="flex mx-auto">
+                                            <img class="w-4/12 sm:w-2/12 lg:w-1/12" src="{{cart_item.image_url}}" alt="">
+                                            <span class="w-8/12 sm:w-8/12 inline-block sm:flex p-3 py-2 text-align-left" style="justify-content: space-between;">
+                                                <div>
+                                                    <span class="block stem-medium">{{cart_item.brand}} {{cart_item.article}}</span>
+                                                    <span>{{cart_item.product_name}}</span>
+                    
+                                                    <div class="mt-3">
+                                                        <span class="inline-block mr-3">Цена: <span class="stem-medium">{{cart_item.price}}</span></span>
+                                                        <!-- <span class="inline-block mr-3">Доставка до {{cart_item.delivery_time}}</span> -->
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- количетсво -->
+                                                <div class="mt-3 sm:mb-0 sm:ml-2">
+                                                    <input id="" type="number" min="0.0" value="{{cart_item.get_cart_item_quantity_int}}" class="w-16 h-8 p-2 inline border rounded border-gray-300 focus:outline-none text-xs sm:text-sm text-gray-600" data-cart_item_id="{{cart_item.cart_item_id}}" data-is_selected="{{cart_item.is_selected}}" data-max_quantity="{{cart_item.max_quantity}}" onkeyup="updateCartItemQuantity(this)">
+                                                </div>
+                                                <!--  -->
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+    
+                            {% endfor %}
+                            <tr class="shop_underline">
+                                <td colspan="20">
+                                    <div style="text-align: right;" class="my-3">
+                                        <p>
+                                            <span class="">Стоимость товаров: </span>
+                                            <span class="cost_for_shop"></span>
+                                            <span data-shop_name="{{shop_name}}" class="shop_name"></span>
+                                        </p>
+    
+                                        <div class="delivery_types"></div>
+    
+                                    </div>
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                        {% endfor %}
+
+                    </tbody>
+
+                    <tr class="web_shop_underline border-t">
+                        <td colspan="20">
+                            <div style="text-align: right;" class="">
+                                
+                                <span data-web_shop_name="{{web_shop_site}}" class="web_shop_name stem-medium"></span>
+
+                                <div class="web_shop_delivery_types"></div>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+            <!--  -->
+
+        </div>
+        <!--  -->
+
+
+        <!-- Итого -->
+        {% if not cart.favorite_address %}<a class="block text-center mt-5 my-2 mx-auto text-red-600 cursor-pointer" onclick="showCartRecipientDataForm()">Адрес доставки не выбран</a>{% endif %}
+        <div class="stem-medium text-xs sm:text-sm mt-3">
+            <div class="flex">
+                <p id="cart_items_quantity_info" style="text-align: right;" class="my-1 sm:my-2 w-6/12  mr-1"><span class="stem-light">Выбрано:</span>0 позиции (0 шт)<br class="block sm:hidden"><span class="stem-light"> на сумму:</span></p>
+                <p id="total_cost_for_shop_all_valid" class="my-1 sm:my-2 w-5/12 ml-1 text-align-left" style="align-self: flex-end;"> Р</p>
+            </div>
+
+            <div id="service_fee_container" class="flex">
+                <p style="text-align: right;" class="my-1 sm:my-2 w-6/12 mr-1"><span class="stem-light">Сервисный сбор:</span></p>
+                <p id="service_fee_price" class="my-1 sm:my-2 w-5/12 ml-1 text-align-left" style="align-self: flex-start;">{{service_fee}} P</p>
+            </div>
+
+            <div class="flex">
+                <p style="text-align: right;" class="my-1 sm:my-2 w-6/12 mr-1"><span class="stem-light">Сумма доставки:</span><br> <span id="delivery_price_time_expired" class="stem-light text-xs">(цена актуальна в <br class="sm:hidden"> течение 4 часов)</span></p>
+                <p id="delivery_price_full" class="my-1 sm:my-2 w-5/12 ml-1 text-align-left" style="align-self: flex-start;"></p>
+            </div>
+
+            <div class="flex">
+                <p style="text-align: right;" class="my-1 sm:my-2 w-6/12 mr-1"><span class="stem-light">Итого: </span></p>
+                <p id="main_total" class="my-1 sm:my-2 w-5/12 ml-1 text-align-left">{{cart.get_total_cost_for_selected}} Р</p>
+            </div>
+
+            <div class="flex">
+                <span class="inline-block mx-3">С <a href="/contract-offer" target="_blank" class="underline underline-offset-4">договором-офертой</a> согласен</span>
+                <span class="cursor-pointer" title="Вес не должен превышать 30 кг. Сумма сторон не должна быть больше 150 см. Сумма габаритов может быть больше 150 см, если упакованный товар помещается в объем 43*54*90. Это размер багажника машины.">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                    </svg>
+                </span>
+                <a id="create_order_btn" class="mx-3 inline-block text-xs sm:text-sm my-5 py-2 px-5 text-sm rounded-md bg-red-600 hover:bg-red-300 text-white stem-medium cursor-pointer" data-cart_id="{{cart.id}}" onclick="CreateOrder()">Оформить заказ</a>
+            </div>
+            <span id="working_hours_info" class="hidden block text-center text-red-600 stem-light mb-10" style="font-size: 12px; font-weight: 100;">
+                * Заказ оформляется в рабочее время. Пн - Пт, с 9:00 - 18:00    
+            </span>
+        </div>
+        <!--  -->
+
+    {% else %}
+        <div id="" class="w-11/12 mx-auto text-center bg-gray-100 mt-8 p-5 rounded">Товары для оформления заказа отсутствуют.</div>
+    {% endif %}
+
+
+
+    <!-- попапы -->
+        <!-- форма для адреса -->
+        {% include 'cart/cart_address_form_include.html' %}
+        <!--  -->
+
+        <!-- попап с адресами для доставки -->
+            <div id="delivery_addresses_popup" class="h-96 close_popup center_popup z-10 w-11/12 md:max-w-md bg-white border rounded border-white p-6 pt-10 overflow-x-scroll text-xs sm:text-sm" style="display: none;">
+                <!-- крестик для закрытия формы -->
+                <img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closePopup(this)">
+                <!--  -->
+                
+                <!-- заголовок -->
+                <span class="block text-base text-center stem-medium">Выбрать другой адрес</span>
+                <!--  -->
+                
+                <p class="">Подберем отделения почты или пункты выдачи неподалеку или будем отправлять по нему курьера</p>
+
+                <!-- адреса доставок -->
+                <div class="mt-5">
+                    {% for address in cart.addresses.all %}
+                    <div class="flex flex-nowrap border border-gray-200 rounded mb-4 p-3" style="justify-content: space-between;">
+                        <div class="mb-3 sm:mb-0 mr-2">
+                            <p class="my-0 text-align-left">{{address.address_delivery}}</p>
+                        </div>
+                        <div>
+                            <button id="" class="block my-1 mx-auto border py-1 px-3 sm:py-2 sm:px-5 rounded-md border-gray-300 bg-gray-300 hover:bg-gray-400 text-black text-xs sm:text-sm" data-method="put" data-cart_recipient_id="{{address.id}}" onclick="handleCartRecipient(this)">Выбрать</button>
+                            <button id="" class="block my-1 mx-auto border py-1 px-3 sm:py-2 sm:px-5 rounded-md bg-red-500 hover:bg-red-300 text-white text-xs sm:text-sm" data-method="delete" data-cart_recipient_id="{{address.id}}" onclick="handleCartRecipient(this)">Удалить</button>
+                            <a class="text-blue-500 cursor-pointer" onclick="handleCartRecipient(this)"
+                            data-method="post"
+                            
+                            data-cart_recipient_id="{{address.id}}"
+                            data-address_delivery="{{address.address_delivery}}"
+                            data-porch="{{address.porch}}"
+                            data-floor="{{address.floor}}"
+                            data-appartment="{{address.appartment}}"
+                            data-door_code="{{address.door_code}}"
+                            data-postal_code="{{address.postal_code}}"
+                            data-recipient_name="{{address.recipient_name}}"
+                            data-phone="{{address.phone}}"
+                            data-email="{{address.email}}"
+                            >Редактировать</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!--  -->
+
+                <a class="text-blue-500 cursor-pointer" onclick="showCartRecipientDataForm()">+ Добавить новый адрес</a>
+                
+            </div>
+        <!--  -->
+
+        <!-- Попап с формой для доверенности -->
+            <div id="pickup_form" class="close_popup center_popup z-10 w-11/12 md:max-w-md bg-white border rounded border-white p-6 pt-10 hidden">
+
+                <!-- крестик для закрытия формы -->
+                <img id="" style="left: 95%; top: -1%; position: relative;" src="{% static 'images/close-icon.png' %}" alt="closeicon" class="cursor-pointer" onclick="closePickUpForm(this)">
+                <!--  -->
+
+                <!-- заголовок формы -->
+                <span class="block text-base text-center stem-medium">Данные для доверенности</span>
+                <!--  -->
+                
+                <!-- Предупреждение -->
+                <span class="block text-xs my-2">
+                    Паспортные данные необходимы для выдачи доверенности на получение товара со склада. 
+                    Поставщик работает только с юридическими лицами. 
+                    Если вы не хотите передавать паспортные данные, воспользуйтесь услугами нашего курьера.
+                </span>
+                <!--  -->
+
+                <!-- ФИО -->
+                <p class="mt-3 mb-0 text-xs text-align-left">ФИО (н-р: Иванов Иван Иванович)<span class="text-red-600">*</span></p>
+                <input type="text" name="full_name" id="full_name" class="border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="ФИО">
+                <!--  -->
+
+                <!-- Паспорт: серия номер -->
+                <p class="mt-3 mb-0 text-xs text-align-left">Паспорт: серия номер (н-р: 1234 123456)<span class="text-red-600">*</span></p>
+                <input type="text" name="series_number" id="series_number" class="border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="Паспорт: серия номер">
+                <!--  -->
+
+                <!-- Кем выдан -->
+                <p class="mt-3 mb-0 text-xs text-align-left">Кем выдан (н-р: Отделением УФМС России по Оренбургской обл. в Оренбургском р-не)<span class="text-red-600">*</span></p>
+                <input type="text" name="issuer" id="issuer" class="border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="Кем выдан">
+                <!--  -->
+
+                <!-- Дата выдачи -->
+                <p class="mt-3 mb-0 text-xs text-align-left">Дата выдачи (н-р: 1 сентября 2000 г.)<span class="text-red-600">*</span></p>
+                <input type="text" name="date_of_issue" id="date_of_issue" class="border rounded border-gray-400 focus:outline-none w-full p-2" placeholder="Дата выдачи">
+                <!--  -->
+
+                <!-- кнопка отправить -->
+                <button id="" class="block my-5 mx-auto border py-2 px-5 text-sm rounded-md border-gray-300 bg-gray-300 hover:bg-gray-400 text-black" onclick="addPassport()">Сохранить</button>
+                <p id="quantity_info" class="text-red-600 my-0 text-xs text-align-left">*обязательное поле</p>
+                <p id="passport_form_info" class="text-red-600 mt-2 text-xs text-align-left"></p>
+                <!--  -->
+            </div>
+        <!--  -->
+
+        <!-- Попап с пунктами выдачи -->
+            <div id="delivery_points_popup" class="hidden"></div>
+        <!--  -->
+
+    <!--  -->
+
+
+    <!-- стили для инпут number -->
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+    <!--  -->
+
+    <!-- js -->
+        <script>
+            const cart_id = '{{cart.id}}';
+            const favorite_address = '{% if cart.favorite_address %}True{% else %}False{% endif %}';
+            const delivery_address = 'False';
+
+            const service_fee = '{{service_fee}}';
+            if (service_fee == '0') {
+                document.querySelector('#service_fee_container').style.display = 'none';
+            };
+
+            window.is_passport = '{{is_passport}}';
+        </script>
+
+        <!-- imask -->
+        <script src="https://unpkg.com/imask"></script>
+        <script src="{% static 'js/cart/imask.js' %}"></script>
+        <!--  -->
+
+        <script src="{% static 'js/cart/cart_address_form_include.js' %}"></script>
+        <script src="{% static 'js/cart/update_quantity.js' %}"></script>
+        <script src="{% static 'js/suggest_addresses.js' %}"></script>
+        <script src="{% static 'js/cart/create_order.js' %}"></script>
+
+        <script src="{% static 'js/cart/handle_passport.js' %}"></script>
+    <!--  -->
+{% endblock content %}
